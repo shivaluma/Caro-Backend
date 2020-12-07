@@ -40,7 +40,7 @@ export class UserRepository extends Repository<User> {
     const user = await this.findOne({ username });
 
     if (user && (await user.validatePassword(password))) {
-      return { id: user.id, username: user.username };
+      return { id: user.id, username: user.username, role: user.role };
     } else {
       return null;
     }

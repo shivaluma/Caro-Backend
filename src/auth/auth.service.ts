@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserRepository } from '../user/user.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterCredentialsDto } from './dto/register-credentials.dto';
@@ -21,6 +26,7 @@ export class AuthService {
 
   async signIn(
     authCredentialsDto: LoginCredentialsDto,
+    role: 'user' | 'admin' = 'user',
   ): Promise<{ payload: TokenPayload; accessToken: string }> {
     const payload = await this.userRepository.validateUserPassword(
       authCredentialsDto,
@@ -28,6 +34,12 @@ export class AuthService {
 
     if (!payload) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+    if (role === 'admin' && payload.role !== 'admin') {
+      throw new HttpException(
+        'You dont have permission to access to this page.',
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     const accessToken = await this.jwtService.sign(payload);
