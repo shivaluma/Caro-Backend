@@ -6,10 +6,6 @@ export class AppService {
   constructor(private configService: ConfigService) {}
 
   getHello(): string {
-    return 'Hello World from asd23!';
-  }
-
-  postHello(): string {
-    return 'Post re!';
+    return 'Welcome to Caro API';
   }
 }
