@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import * as argon2 from 'argon2';
 import TokenPayload from '../auth/token-payload.interface';
+
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
   async signUp(authCredentialsDTO: RegisterCredentialsDto): Promise<void> {
