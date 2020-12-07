@@ -5,6 +5,7 @@ import { RegisterCredentialsDto } from './dto/register-credentials.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
 import { LoginCredentialsDto } from './dto/login-credentials.dto';
+import TokenPayload from './token-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -20,18 +21,17 @@ export class AuthService {
 
   async signIn(
     authCredentialsDto: LoginCredentialsDto,
-  ): Promise<{ accessToken: string }> {
-    const username = await this.userRepository.validateUserPassword(
+  ): Promise<{ payload: TokenPayload; accessToken: string }> {
+    const payload = await this.userRepository.validateUserPassword(
       authCredentialsDto,
     );
 
-    if (!username) {
+    if (!payload) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload: JwtPayload = { username };
     const accessToken = await this.jwtService.sign(payload);
 
-    return { accessToken };
+    return { payload, accessToken };
   }
 }

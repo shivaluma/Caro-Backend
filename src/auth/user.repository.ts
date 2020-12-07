@@ -6,17 +6,20 @@ import {
   ConflictException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-
+import * as argon2 from 'argon2';
+import TokenPayload from './token-payload.interface';
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
   async signUp(authCredentialsDTO: RegisterCredentialsDto): Promise<void> {
-    const { username, password } = authCredentialsDTO;
+    const { username, password, confirmPassword } = authCredentialsDTO;
+
+    if (password !== confirmPassword) {
+      throw new ConflictException('Password and confirmPassword is not match');
+    }
 
     const user = new User();
     user.username = username;
-    user.salt = await bcrypt.genSalt();
-    user.password = await UserRepository.hashPassword(password, user.salt);
+    user.password = await argon2.hash(password);
 
     try {
       await user.save();
@@ -31,21 +34,15 @@ export class UserRepository extends Repository<User> {
 
   async validateUserPassword(
     authCredentialsDto: LoginCredentialsDto,
-  ): Promise<string> {
+  ): Promise<TokenPayload> {
+    console.log(authCredentialsDto);
     const { username, password } = authCredentialsDto;
     const user = await this.findOne({ username });
 
     if (user && (await user.validatePassword(password))) {
-      return user.username;
+      return { id: user.id, username: user.username };
     } else {
       return null;
     }
-  }
-
-  private static async hashPassword(
-    password: string,
-    salt: string,
-  ): Promise<string> {
-    return bcrypt.hash(password, salt);
   }
 }

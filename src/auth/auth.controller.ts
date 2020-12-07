@@ -10,7 +10,8 @@ import { RegisterCredentialsDto } from './dto/register-credentials.dto';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { LoginCredentialsDto } from './dto/login-credentials.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { Roles } from 'src/utils/role.decorator';
 
 @Controller('auth')
 @ApiTags('Authentication')
@@ -30,10 +31,17 @@ export class AuthController {
   ): Promise<{ accessToken: string }> {
     return this.authService.signIn(authCredentialsDto);
   }
-
+  @ApiBearerAuth()
   @Post('/test')
   @UseGuards(AuthGuard())
   test(@Req() req) {
-    console.log(req);
+    return { message: 'Normal route, akll roles can get' };
+  }
+  @ApiBearerAuth()
+  @Post('/test2')
+  @UseGuards(AuthGuard())
+  @Roles('admin')
+  test2(@Req() req) {
+    return { message: 'Admin route, akll roles can get' };
   }
 }
