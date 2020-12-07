@@ -1,13 +1,13 @@
 import { EntityRepository, Repository } from 'typeorm';
 import { User } from './user.entity';
-import { RegisterCredentialsDto } from './dto/register-credentials.dto';
-import { LoginCredentialsDto } from './dto/login-credentials.dto';
+import { RegisterCredentialsDto } from '../auth/dto/register-credentials.dto';
+import { LoginCredentialsDto } from '../auth/dto/login-credentials.dto';
 import {
   ConflictException,
   InternalServerErrorException,
 } from '@nestjs/common';
 import * as argon2 from 'argon2';
-import TokenPayload from './token-payload.interface';
+import TokenPayload from '../auth/token-payload.interface';
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
   async signUp(authCredentialsDTO: RegisterCredentialsDto): Promise<void> {

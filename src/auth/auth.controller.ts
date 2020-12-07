@@ -35,13 +35,13 @@ export class AuthController {
   @Post('/test')
   @UseGuards(AuthGuard())
   test(@Req() req) {
-    return { message: 'Normal route, akll roles can get' };
+    return { message: 'Normal route, all roles can get' };
   }
   @ApiBearerAuth()
   @Post('/test2')
   @UseGuards(AuthGuard())
   @Roles('admin')
   test2(@Req() req) {
-    return { message: 'Admin route, akll roles can get' };
+    return { message: 'Admin route' };
   }
 }
