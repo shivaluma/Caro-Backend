@@ -7,6 +7,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const reflector = app.get<Reflector>(Reflector);
   app.useGlobalGuards(new RolesGuard(reflector));
+  app.enableCors({
+    origin: '*',
+  });
+  app.setGlobalPrefix('/api');
   const options = new DocumentBuilder()
     .setTitle('Caro API')
     .setDescription('The Caro API description')
@@ -18,8 +22,8 @@ async function bootstrap() {
     })
     .build();
   const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api/docs', app, document);
 
-  await app.listen(4000);
+  await app.listen(4101);
 }
 bootstrap();
