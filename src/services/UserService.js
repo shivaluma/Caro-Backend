@@ -8,8 +8,13 @@ module.exports = {
         email,
         password,
         displayName,
+        role: 'user',
         idGoogle,
         idFacebook,
+        point: 1000,
+        wincount: 0,
+        losecount: 0,
+        drawcount: 0,
       });
       return user;
     } catch (err) {
@@ -33,7 +38,7 @@ module.exports = {
         returnNewDocument: true,
         returnOriginal: false,
         projection: { password: 0 },
-      }
+      },
     );
 
     return user.value;

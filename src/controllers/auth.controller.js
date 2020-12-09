@@ -16,7 +16,7 @@ exports.postSignUp = async (req, res) => {
     return res.status(400).json(
       ResponseService.error(400, 'Password and confirmPassword do not match.', {
         fields: ['password', 'confirmPassword'],
-      })
+      }),
     );
   }
 
@@ -28,13 +28,13 @@ exports.postSignUp = async (req, res) => {
       return res
         .status(201)
         .json(
-          ResponseService.response(201, 'Create account successfully.', null)
+          ResponseService.response(201, 'Create account successfully.', null),
         );
     } catch (err) {
       return res
         .status(400)
         .json(
-          ResponseService.error(400, 'Email exist.', { fields: ['email'] })
+          ResponseService.error(400, 'Email exist.', { fields: ['email'] }),
         );
     }
   } catch (err) {
@@ -62,8 +62,8 @@ exports.postSignIn = async (req, res) => {
           ResponseService.error(
             404,
             'Cannot find account with this email.',
-            null
-          )
+            null,
+          ),
         );
 
     const isSamePassword = await argon2.verify(user.password, password);
@@ -78,13 +78,14 @@ exports.postSignIn = async (req, res) => {
       id: user._id,
       email: user.email,
       displayName: user.displayName,
+      role: user.role,
     };
     const accessToken = jwt.sign(payload, process.env.SECRET_KEY);
     return res.status(200).json(
       ResponseService.response(200, 'Login Successfully.', {
         accessToken,
         user: payload,
-      })
+      }),
     );
   } catch (err) {
     return res
@@ -99,7 +100,7 @@ exports.postGoogleSignIn = async (req, res) => {
     return res
       .status(404)
       .json(
-        ResponseService.error(404, 'Cannot found the google access token.')
+        ResponseService.error(404, 'Cannot found the google access token.'),
       );
   }
   try {
@@ -116,13 +117,14 @@ exports.postGoogleSignIn = async (req, res) => {
           id: user._id,
           email: user.email,
           displayName: user.displayName,
+          role: user.role,
         };
         const accessToken = jwt.sign(payload, process.env.SECRET_KEY);
         return res.status(200).json(
           ResponseService.response(200, 'Login Successfully.', {
             accessToken,
             user: payload,
-          })
+          }),
         );
       }
 
@@ -131,8 +133,8 @@ exports.postGoogleSignIn = async (req, res) => {
         .json(
           ResponseService.error(
             400,
-            'There is an account with this email address, if you own the account, please login and then bind to this google account.'
-          )
+            'There is an account with this email address, if you own the account, please login and then bind to this google account.',
+          ),
         );
     }
 
@@ -140,7 +142,7 @@ exports.postGoogleSignIn = async (req, res) => {
       response.email,
       'heheuguess',
       response.name,
-      response.sub
+      response.sub,
     );
 
     const newUser = newUserResponse.ops[0];
@@ -156,7 +158,7 @@ exports.postGoogleSignIn = async (req, res) => {
       ResponseService.response(200, 'Login Successfully.', {
         accessToken,
         user: payload,
-      })
+      }),
     );
 
     // create account
@@ -179,14 +181,14 @@ exports.getValidField = async (req, res) => {
     return res.status(200).json(
       ResponseService.response(200, `${field} *${value}* is available.`, {
         isFree: true,
-      })
+      }),
     );
   }
 
   return res.status(200).json(
     ResponseService.response(200, `${field} *${value}* is not available.`, {
       isFree: false,
-    })
+    }),
   );
 };
 
@@ -196,13 +198,13 @@ exports.postFacebookSignin = async (req, res) => {
     return res
       .status(404)
       .json(
-        ResponseService.error(404, 'Cannot found the facebook access token.')
+        ResponseService.error(404, 'Cannot found the facebook access token.'),
       );
   }
   try {
     const query = `https://graph.facebook.com/${id}?fields=birthday,email,picture,name&access_token=${fbAccessToken}`;
     const response = await got(`${query}`).json();
-    console.log(response);
+
     const user = await UserService.findOne({
       $or: [{ 'socials.facebookId': response.id }, { email: response.email }],
     });
@@ -212,13 +214,14 @@ exports.postFacebookSignin = async (req, res) => {
         id: user._id,
         email: user.email,
         displayName: user.displayName,
+        role: user.role,
       };
       const accessToken = jwt.sign(payload, process.env.SECRET_KEY);
       return res.status(200).json(
         ResponseService.response(200, 'Login Successfully.', {
           accessToken,
           user: payload,
-        })
+        }),
       );
     }
 
@@ -227,7 +230,7 @@ exports.postFacebookSignin = async (req, res) => {
       'heheuguess',
       response.name,
       null,
-      response.id
+      response.id,
     );
 
     const newUser = newUserResponse.ops[0];
@@ -242,11 +245,67 @@ exports.postFacebookSignin = async (req, res) => {
       ResponseService.response(200, 'Login Successfully.', {
         accessToken,
         user: payload,
-      })
+      }),
     );
   } catch (err) {
     return res
       .status(500)
       .json(ResponseService.error(500, 'Internal Server Error', err));
+  }
+};
+
+exports.postAdminLogin = async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res
+      .status(400)
+      .json(ResponseService.error(400, 'No email/password was provided.'));
+  }
+
+  try {
+    const user = await UserService.findOne({ email });
+    req.log.info(user);
+    if (!user)
+      return res
+        .status(404)
+        .json(
+          ResponseService.error(
+            404,
+            'Cannot find account with this email.',
+            null,
+          ),
+        );
+
+    const isSamePassword = await argon2.verify(user.password, password);
+
+    if (!isSamePassword) {
+      return res
+        .status(400)
+        .json(ResponseService.error(400, 'Wrong email or password.', null));
+    }
+
+    if (user.role !== 'admin') {
+      return res
+        .status(403)
+        .json(ResponseService.error(403, 'Not enough permissions.', null));
+    }
+
+    const payload = {
+      id: user._id,
+      email: user.email,
+      displayName: user.displayName,
+      role: user.role,
+    };
+    const accessToken = jwt.sign(payload, process.env.SECRET_KEY);
+    return res.status(200).json(
+      ResponseService.response(200, 'Login Successfully.', {
+        accessToken,
+        user: payload,
+      }),
+    );
+  } catch (err) {
+    return res
+      .status(500)
+      .json(ResponseService.error(500, 'Server error.', err));
   }
 };
