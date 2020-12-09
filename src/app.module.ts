@@ -12,6 +12,7 @@ import { UserService } from './user/user.service';
 import { UserController } from './user/user.controller';
 import { UserModule } from './user/user.module';
 import { AdminModule } from './admin/admin.module';
+import { AppGateway } from './app.gateway';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { AdminModule } from './admin/admin.module';
     },
     AppService,
     UserService,
+    AppGateway,
   ],
 })
 export class AppModule {}

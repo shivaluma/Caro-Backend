@@ -1,4 +1,5 @@
 import { NestFactory, Reflector } from '@nestjs/core';
+import { IoAdapter } from '@nestjs/platform-socket.io/adapters/io-adapter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { RolesGuard } from './guards/roles.guard';
@@ -11,6 +12,7 @@ async function bootstrap() {
     origin: '*',
   });
   app.setGlobalPrefix('/api');
+
   const options = new DocumentBuilder()
     .setTitle('Caro API')
     .setDescription('The Caro API description')
@@ -21,6 +23,7 @@ async function bootstrap() {
       scheme: 'bearer',
     })
     .build();
+  app.useWebSocketAdapter(new IoAdapter(app));
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api/docs', app, document);
 
