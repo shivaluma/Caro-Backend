@@ -1,5 +1,6 @@
 const argon2 = require('argon2');
 const { ResponseService, UserService } = require('../services');
+const onlinelist = require('../config/socket').useronline;
 
 exports.getMe = async (req, res) => {
   return res.status(200).json(ResponseService.response(200, null, req.user));
@@ -50,4 +51,15 @@ exports.putUpdateProfile = async (req, res) => {
       .status(500)
       .json(ResponseService.error(500, 'Update profile success', err));
   }
+};
+
+exports.getOnline = async (req, res) => {
+  return res.status(200).json(
+    ResponseService.response(
+      200,
+      'Online List',
+      [...onlinelist].filter((email) => email !== req.user.email),
+      // eslint-disable-next-line global-require
+    ),
+  );
 };

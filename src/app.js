@@ -6,7 +6,9 @@ const pino = require('pino');
 const expressPino = require('express-pino-logger');
 const bodyParser = require('body-parser');
 const passport = require('passport');
+const socketio = require('socket.io');
 
+const http = require('http');
 const db = require('./config/db');
 
 const logger = pino({
@@ -17,6 +19,15 @@ const expressLogger = expressPino({ logger });
 const router = require('./routes');
 
 const app = express();
+const httpServer = http.createServer(app);
+const io = socketio(httpServer, {
+  cors: {
+    origin: '*',
+  },
+  transports: ['websocket'],
+});
+require('./config/socket').setupSocket(io);
+
 app.use(bodyParser.json());
 app.use(cors());
 app.use(compression());
@@ -33,7 +44,7 @@ db.initDb((err) => {
   if (err) {
     logger.error(err);
   } else {
-    app.listen(process.env.PORT, async () => {
+    httpServer.listen(process.env.PORT, async () => {
       logger.info(`Server started on port ${process.env.PORT}`);
     });
   }

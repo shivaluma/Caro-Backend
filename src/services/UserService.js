@@ -9,6 +9,7 @@ module.exports = {
         password,
         role: 'user',
         displayName,
+        role: 'user',
         idGoogle,
         idFacebook,
         point: 1000,
