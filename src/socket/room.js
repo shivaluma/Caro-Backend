@@ -1,7 +1,4 @@
-const useronline = require('../services/OnlineService');
 const roomService = require('../services/RoomService');
-
-const playerInRoom = {};
 
 module.exports = (socket) => {
   socket.on('create-room', () => {

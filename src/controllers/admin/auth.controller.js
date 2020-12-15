@@ -2,7 +2,7 @@ require('dotenv').config();
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
 const got = require('got');
-const { ResponseService, UserService } = require('../services');
+const { ResponseService, UserService } = require('../../services');
 
 exports.postSignInAdmin = async (req, res) => {
   const { email, password } = req.body;
@@ -34,7 +34,7 @@ exports.postSignInAdmin = async (req, res) => {
         .json(ResponseService.error(400, 'Wrong email or password.', null));
     }
 
-    if (user.role != 'Admin') {
+    if (user.role !== 'Admin') {
       return res
         .status(403)
         .json(ResponseService.error(403, 'Does not have permission.'));
