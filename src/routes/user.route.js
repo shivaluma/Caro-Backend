@@ -5,7 +5,7 @@ const UserController = require('../controllers/user.controller');
 const authenticate = passport.authenticate('jwt', { session: false });
 
 router.get('/me', authenticate, UserController.getMe);
-router.get('/online', authenticate, UserController.getOnline);
+router.get('/online', UserController.getOnline);
 router.put('/', authenticate, UserController.putUpdateProfile);
 router.put('/password', authenticate, UserController.changePassword);
 // router.put('/', authenticate, UserController.getMe);

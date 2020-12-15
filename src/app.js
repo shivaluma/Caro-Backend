@@ -26,7 +26,7 @@ const io = socketio(httpServer, {
   },
   transports: ['websocket'],
 });
-require('./config/socket').setupSocket(io);
+require('./socket/configureSocket').setupSocket(io);
 
 app.use(bodyParser.json());
 app.use(cors());
