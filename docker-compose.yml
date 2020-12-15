@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  #
+  redis:
+    container_name: redis
+    image: redis:5
+    command: redis-server --requirepass pppp
+    ports:
+      - '6379:6379'
+
+    environment:
+      - REDIS_REPLICATION_MODE=master

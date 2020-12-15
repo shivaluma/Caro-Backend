@@ -16,8 +16,8 @@ module.exports = {
     const room = await getCollection('rooms').insertOne({
       firstPlayer,
       secondPlayer,
-      moves: [],
-      createdAt: new Date(),
+      chats: [],
+      rule: {},
     });
     return room;
   },

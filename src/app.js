@@ -14,6 +14,7 @@ const db = require('./config/db');
 const redisAdapter = adapter({
   host: process.env.REDIS_HOST || 'localhost',
   port: process.env.REDIS_PORT || 6379,
+  password: 'pppp',
 });
 
 const logger = pino({

@@ -21,7 +21,9 @@ module.exports = (socket) => {
     });
   });
 
-  socket.on('join-room', ({ roomId, user }) => {});
+  socket.on('join-room', ({ roomId, user }) => {
+    socket.to(roomId).emit('user-join-room', user);
+  });
 
   socket.on('change-side', ({ roomId, user, side }) => {
     if (side === 'x') {
@@ -46,12 +48,4 @@ module.exports = (socket) => {
   });
 
   socket.on('leave-room', (roomId, playerId) => {});
-
-  socket.on('user-offline', (email) => {
-    useronline.delete(email);
-    socket.broadcast.emit('user-change', {
-      online: false,
-      data: { email },
-    });
-  });
 };

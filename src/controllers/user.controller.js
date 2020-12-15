@@ -1,8 +1,24 @@
 const argon2 = require('argon2');
 const { ResponseService, UserService } = require('../services');
 const onlinelist = require('../services/OnlineService');
+const redis = require('../config/redis');
 
 exports.getMe = async (req, res) => {
+  if (req.user) {
+    const data = await redis.getAsync(`users:${req.user.id}`);
+    if (data) {
+      return res
+        .status(403)
+        .json(
+          ResponseService.error(
+            403,
+            'This account is currently logging in.',
+            null,
+          ),
+        );
+    }
+  }
+
   return res.status(200).json(ResponseService.response(200, null, req.user));
 };
 

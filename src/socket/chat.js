@@ -1,11 +1,5 @@
-const useronline = require('../services/OnlineService');
-
 module.exports = (socket) => {
-  socket.on('user-offline', (email) => {
-    useronline.delete(email);
-    socket.broadcast.emit('user-change', {
-      online: false,
-      data: { email },
-    });
+  socket.on('new-chat-message', ({ roomId, message, userId }) => {
+    socket.to(roomId).emit('new-chat-message', { message, userId });
   });
 };

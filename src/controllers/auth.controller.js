@@ -3,6 +3,7 @@ const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
 const got = require('got');
 const { ResponseService, UserService } = require('../services');
+const redis = require('../config/redis');
 
 exports.postSignUp = async (req, res) => {
   const { email, password, confirmPassword } = req.body;
@@ -74,6 +75,18 @@ exports.postSignIn = async (req, res) => {
         .json(ResponseService.error(400, 'Wrong email or password.', null));
     }
 
+    const data = await redis.getAsync(`users:${user._id}`);
+    if (data) {
+      return res
+        .status(400)
+        .json(
+          ResponseService.error(
+            400,
+            'This account is currently logging in.',
+            null,
+          ),
+        );
+    }
     const payload = {
       id: user._id,
       email: user.email,
