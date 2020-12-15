@@ -7,9 +7,14 @@ const expressPino = require('express-pino-logger');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 const socketio = require('socket.io');
-
+const adapter = require('socket.io-redis');
 const http = require('http');
 const db = require('./config/db');
+
+const redisAdapter = adapter({
+  host: process.env.REDIS_HOST || 'localhost',
+  port: process.env.REDIS_PORT || 6379,
+});
 
 const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
@@ -26,6 +31,7 @@ const io = socketio(httpServer, {
   },
   transports: ['websocket'],
 });
+io.adapter(redisAdapter);
 require('./socket/configureSocket').setupSocket(io);
 
 app.use(bodyParser.json());

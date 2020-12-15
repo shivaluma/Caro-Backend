@@ -1,6 +1,8 @@
 const useronline = require('../services/OnlineService');
 const roomService = require('../services/RoomService');
 
+const playerInRoom = {};
+
 module.exports = (socket) => {
   socket.on('create-room', () => {
     const roomId = roomService.rooms.findIndex((r) => r === null);
@@ -40,6 +42,7 @@ module.exports = (socket) => {
         roomService.rooms[roomId].secondPlayer = null;
       }
     }
+    socket.to(roomId).emit('player-change-side', { user, roomId, side });
   });
 
   socket.on('leave-room', (roomId, playerId) => {});
