@@ -1,15 +1,6 @@
 const roomService = require('../services/RoomService');
 
 module.exports = (socket) => {
-  socket.on('create-room', () => {
-    const roomId = roomService.rooms.findIndex((r) => r === null);
-    roomService.rooms[roomId] = {
-      firstPlayer: null,
-      secondPlayer: null,
-      roomId,
-      
-      createdAt: new Date(),
-    };
   socket.on('create-room', ({ _id }) => {
     const roomId =
       socket.roomId ||
@@ -36,15 +27,15 @@ module.exports = (socket) => {
   });
 
   socket.on('join-room', ({ roomId, user }) => {
-<<<<<<< HEAD
-    socket
-      .to(roomId)
-      .emit('user-join-room', { user, room: roomService.rooms[roomId] });
-=======
     socket.join(`room-${roomId}`);
-
     socket.to(`room-${roomId}`).emit('user-join-room', user);
->>>>>>> f33b95f852d49f16ca918efd17b283145afac5d9
+  });
+
+  socket.on('room-change', ({ board, roomId, next }) => {
+    const room = roomService.rooms[roomId];
+    const user = next ? room.firstPlayer : room.secondPlayer;
+    socket.join(`room-${roomId}`);
+    socket.to(`room-${roomId}`).emit('room-changed', { board, next, user });
   });
 
   socket.on('change-side', ({ roomId, user, side }) => {
