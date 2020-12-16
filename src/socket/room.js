@@ -13,6 +13,7 @@ module.exports = (socket, io) => {
         firstPlayer: null,
         secondPlayer: null,
         roomId,
+        chats: [],
         board: null,
         createdAt: new Date(),
       };
@@ -28,6 +29,8 @@ module.exports = (socket, io) => {
 
   socket.on('join-room', ({ roomId, user }) => {
     socket.join(`room-${roomId}`);
+    socket.room = roomService.rooms[roomId];
+
     socket.to(`room-${roomId}`).emit('user-join-room', user);
   });
 
@@ -70,5 +73,9 @@ module.exports = (socket, io) => {
       .emit('player-change-side', { user, roomId, side, leaveSide, userTurn });
   });
 
-  socket.on('leave-room', (roomId, user) => {});
+  socket.on('leave-room', (roomId, user) => {
+    socket.join(`room-${roomId}`);
+
+    socket.to(`room-${roomId}`).emit('user-join-room', user);
+  });
 };

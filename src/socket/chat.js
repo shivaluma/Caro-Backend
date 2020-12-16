@@ -1,5 +1,6 @@
-module.exports = (socket) => {
-  socket.on('new-chat-message', ({ roomId, message, userId }) => {
-    socket.to(roomId).emit('new-chat-message', { message, userId });
+module.exports = (socket, io) => {
+  socket.on('user-send-message', ({ roomId, content, user }) => {
+    if (socket.room) socket.room.chats.push({ sender: user, content });
+    io.to(`room-${roomId}`).emit('new-chat-message', { sender: user, content });
   });
 };
