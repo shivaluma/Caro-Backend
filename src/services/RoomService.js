@@ -18,13 +18,14 @@ module.exports = {
     const room = await getCollection('rooms').findById(ObjectId(id));
     return room;
   },
-  createRoom: async ({ firstPlayer, secondPlayer }) => {
-    const room = await getCollection('rooms').insertOne({
-      firstPlayer,
-      secondPlayer,
-      chats: [],
-      rule: {},
+  createRoom: async (room, winner, board) => {
+    console.log(room);
+    return await getCollection('rooms').insertOne({
+      firstPlayer: room.firstPlayer,
+      secondPlayer: room.secondPlayer,
+      chats: room.chats,
+      winner: winner,
+      board: board,
     });
-    return room;
   },
 };
