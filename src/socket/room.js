@@ -2,13 +2,17 @@ const roomService = require('../services/RoomService');
 
 module.exports = (socket) => {
   socket.on('create-room', () => {
-    const roomId = roomService.rooms.findIndex((r) => r === null);
-    roomService.rooms[roomId] = {
-      firstPlayer: null,
-      secondPlayer: null,
-      roomId,
-      createdAt: new Date(),
-    };
+    const roomId = roomService.rooms.findIndex(
+      (r) => r === null || (r.firstPlayer === null && r.secondPlayer === null),
+    );
+    if (!roomService.rooms[roomId]) {
+      roomService.rooms[roomId] = {
+        firstPlayer: null,
+        secondPlayer: null,
+        roomId,
+        createdAt: new Date(),
+      };
+    }
     socket.emit('created-room-info', {
       room: roomService.rooms[roomId],
     });
