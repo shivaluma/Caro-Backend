@@ -14,6 +14,7 @@ module.exports = (socket) => {
         secondPlayer: null,
         roomId,
         chats: [],
+        board: null,
         createdAt: new Date(),
       };
     }
@@ -31,6 +32,13 @@ module.exports = (socket) => {
     socket.room = roomService.rooms[roomId];
 
     socket.to(`room-${roomId}`).emit('user-join-room', user);
+  });
+
+  socket.on('room-change', ({ board, roomId, next }) => {
+    const room = roomService.rooms[roomId];
+    const user = next ? room.firstPlayer : room.secondPlayer;
+    socket.join(`room-${roomId}`);
+    socket.to(`room-${roomId}`).emit('room-changed', { board, next, user });
   });
 
   socket.on('change-side', ({ roomId, user, side }) => {
