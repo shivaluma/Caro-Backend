@@ -5,11 +5,11 @@ module.exports = {
   createUser: async (email, password, displayName, idGoogle, idFacebook) => {
     try {
       const user = await getCollection('users').insertOne({
-        username,
+        email,
         password,
         role: 'user',
         displayName,
-        role: 'user',
+
         idGoogle,
         idFacebook,
         point: 1000,
