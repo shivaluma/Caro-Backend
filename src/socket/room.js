@@ -35,11 +35,18 @@ module.exports = (socket, io) => {
   });
 
   socket.on('room-change', ({ board, roomId, next }) => {
-    console.log(next);
     const room = roomService.rooms[roomId];
     const user = next ? room.secondPlayer : room.firstPlayer;
     socket.join(`room-${roomId}`);
     io.to(`room-${roomId}`).emit('room-changed', { board, next, user });
+  });
+
+  socket.on('game-end', ({ board, roomId, next }) => {
+    const room = roomService.rooms[roomId];
+    socket.join(`room-${roomId}`);
+    const winner = next ? room.firstPlayer : room.secondPlayer;
+    roomService.createRoom(room, winner, board);
+    io.to(`room-${roomId}`).emit('game-ended', { board, next });
   });
 
   socket.on('change-side', ({ roomId, user, side }) => {
