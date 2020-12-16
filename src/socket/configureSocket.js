@@ -1,5 +1,6 @@
 const online = require('./online');
 const room = require('./room');
+const chat = require('./chat');
 
 const setupSocket = (io) => {
   io.on('connection', (socket) => {
@@ -9,6 +10,7 @@ const setupSocket = (io) => {
     // integrate online module
     online(socket);
     room(socket);
+    chat(socket, io);
   });
 };
 
