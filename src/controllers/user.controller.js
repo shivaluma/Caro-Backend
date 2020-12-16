@@ -81,3 +81,27 @@ exports.getOnline = async (req, res) => {
     ),
   );
 };
+
+exports.getFullProfile = async (req, res) => {
+  const { id } = req.query;
+
+  try {
+    const data = await UserService.getUserWithGame(id);
+
+    return res.status(200).json(
+      ResponseService.response(
+        200,
+        'Get profile successfully.',
+        data,
+        // eslint-disable-next-line global-require
+      ),
+    );
+  } catch (err) {
+    ResponseService.error(
+      400,
+      'Cannot get user profile',
+
+      // eslint-disable-next-line global-require
+    );
+  }
+};

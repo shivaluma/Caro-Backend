@@ -19,13 +19,13 @@ module.exports = {
     return room;
   },
   createRoom: async (room, winner, board) => {
-    console.log(room);
-    return await getCollection('rooms').insertOne({
+    const res = await getCollection('rooms').insertOne({
       firstPlayer: room.firstPlayer,
       secondPlayer: room.secondPlayer,
       chats: room.chats,
-      winner: winner,
-      board: board,
+      winner,
+      board,
     });
+    return res;
   },
 };

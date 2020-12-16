@@ -41,7 +41,27 @@ module.exports = {
         projection: { password: 0 },
       },
     );
-
     return user.value;
+  },
+
+  getUserWithGame: async (id) => {
+    const userPromise = getCollection('users').findOne(
+      {
+        _id: ObjectId(id),
+      },
+      { projection: { password: 0 } },
+    );
+    const gamesPromise = getCollection('rooms')
+      .find(
+        {
+          $or: [{ 'firstPlayer._id': id }, { 'secondPlayer._id': id }],
+        },
+        { projection: { chats: 0, board: 0 } },
+      )
+      .toArray();
+
+    const [user, games] = await Promise.allSettled([userPromise, gamesPromise]);
+
+    return { user, games };
   },
 };
