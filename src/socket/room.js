@@ -7,6 +7,7 @@ module.exports = (socket) => {
       firstPlayer: null,
       secondPlayer: null,
       roomId,
+      board: null,
       createdAt: new Date(),
     };
     socket.emit('created-room-info', {
@@ -19,7 +20,9 @@ module.exports = (socket) => {
   });
 
   socket.on('join-room', ({ roomId, user }) => {
-    socket.to(roomId).emit('user-join-room', user);
+    socket
+      .to(roomId)
+      .emit('user-join-room', { user, room: roomService.rooms[roomId] });
   });
 
   socket.on('change-side', ({ roomId, user, side }) => {
