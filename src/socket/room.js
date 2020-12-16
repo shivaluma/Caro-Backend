@@ -22,9 +22,9 @@ module.exports = (socket, io) => {
       room: roomService.rooms[roomId],
     });
 
-    socket.broadcast.emit('new-room', {
-      room: roomService.rooms[roomId],
-    });
+    // socket.broadcast.emit('new-room', {
+    //   room: roomService.rooms[roomId],
+    // });
   });
 
   socket.on('join-room', ({ roomId, user }) => {
