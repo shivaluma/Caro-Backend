@@ -1,6 +1,6 @@
 const roomService = require('../services/RoomService');
 
-module.exports = (socket) => {
+module.exports = (socket, io) => {
   socket.on('create-room', ({ _id }) => {
     const roomId =
       socket.roomId ||
@@ -32,10 +32,11 @@ module.exports = (socket) => {
   });
 
   socket.on('room-change', ({ board, roomId, next }) => {
+    console.log(next);
     const room = roomService.rooms[roomId];
-    const user = next ? room.firstPlayer : room.secondPlayer;
+    const user = next ? room.secondPlayer : room.firstPlayer;
     socket.join(`room-${roomId}`);
-    socket.to(`room-${roomId}`).emit('room-changed', { board, next, user });
+    io.to(`room-${roomId}`).emit('room-changed', { board, next, user });
   });
 
   socket.on('change-side', ({ roomId, user, side }) => {
@@ -62,9 +63,11 @@ module.exports = (socket) => {
       }
       socket.roomId = null;
     }
+    const room = roomService.rooms[roomId];
+    const userTurn = room.firstPlayer;
     socket
       .to(`room-${roomId}`)
-      .emit('player-change-side', { user, roomId, side, leaveSide });
+      .emit('player-change-side', { user, roomId, side, leaveSide, userTurn });
   });
 
   socket.on('leave-room', (roomId, user) => {});

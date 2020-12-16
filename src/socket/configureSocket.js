@@ -8,7 +8,7 @@ const setupSocket = (io) => {
     });
     // integrate online module
     online(socket);
-    room(socket);
+    room(socket, io);
   });
 };
 
