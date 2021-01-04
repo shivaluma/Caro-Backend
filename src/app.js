@@ -43,10 +43,11 @@ app.use(expressLogger);
 app.use(passport.initialize());
 require('./config/passport')(passport);
 
+
 app.use('/api/v1', router);
-
-app.use('*', (req, res) => res.status(404).send('Not found'));
-
+app.use('*', (req, res) =>
+  res.status(404).json({ message: 'Not found', path: req.originalUrl }),
+);
 db.initDb((err) => {
   if (err) {
     logger.error(err);

@@ -11,13 +11,8 @@ module.exports = (socket) => {
         data: { email: user.email },
       });
     }
-    const res = await redis.setAsync(
-      `users:${user.id}`,
-      socket.id,
-      'NX',
-      'EX',
-      30,
-    );
+
+    await redis.setAsync(`users:${user._id}`, socket.id, 'NX', 'EX', 30);
   });
 
   socket.on('user-offline', async (user) => {
@@ -26,6 +21,8 @@ module.exports = (socket) => {
       online: false,
       data: { email: user.email },
     });
-    await redis.delAsync(`users:${user.id}`);
+    if ((await redis.getAsync(`users:${user._id}`)) === socket.id) {
+      await redis.delAsync(`users:${user._id}`);
+    }
   });
 };
