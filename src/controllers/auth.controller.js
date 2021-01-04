@@ -76,7 +76,7 @@ exports.postSignIn = async (req, res) => {
     }
 
     const data = await redis.getAsync(`users:${user._id}`);
-    console.log(data);
+
     if (data) {
       return res
         .status(400)
