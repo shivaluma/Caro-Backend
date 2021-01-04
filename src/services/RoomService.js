@@ -7,6 +7,10 @@ const rooms = new Array(20).fill(3).map((val, index) => ({
   roomId: index,
   chats: [],
   createdAt: new Date(),
+  board: null,
+  userTurn: null,
+  next: null,
+  lastTick: null,
 }));
 
 module.exports = {
