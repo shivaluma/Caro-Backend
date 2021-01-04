@@ -56,6 +56,9 @@ module.exports = (socket, io) => {
     socket.join(`room-${roomId}`);
     const winner = next ? room.firstPlayer : room.secondPlayer;
     roomService.createRoom(room, winner, board);
+    socket.room.userTurn = null;
+    socket.room.lastTick = lastTick;
+    socket.room.board = board;
     io.to(`room-${roomId}`).emit('game-ended', { board, next, lastTick });
   });
 
