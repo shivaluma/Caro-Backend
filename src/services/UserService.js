@@ -9,7 +9,6 @@ module.exports = {
         password,
         role: 'user',
         displayName,
-
         idGoogle,
         idFacebook,
         point: 1000,
@@ -34,7 +33,7 @@ module.exports = {
   updateField: async (id, update) => {
     const user = await getCollection('users').findOneAndUpdate(
       { _id: ObjectId(id) },
-      { $set: { displayName: update.displayName } },
+      { $set: { ...update } },
       {
         returnNewDocument: true,
         returnOriginal: false,

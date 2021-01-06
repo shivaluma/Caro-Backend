@@ -5,11 +5,7 @@ const redis = require('../config/redis');
 
 exports.getMe = async (req, res) => {
   if (req.user) {
-
-   
     const data = await redis.getAsync(`users:${req.user._id}`);
-
-    console.log(data);
     if (data) {
       return res
         .status(403)

@@ -88,17 +88,14 @@ exports.postSignIn = async (req, res) => {
           ),
         );
     }
-    const payload = {
-      id: user._id,
-      email: user.email,
-      displayName: user.displayName,
-      role: user.role,
-    };
+    const userData = { ...user };
+    delete userData.password;
+    const payload = { _id: user._id };
     const accessToken = jwt.sign(payload, process.env.SECRET_KEY);
     return res.status(200).json(
       ResponseService.response(200, 'Login Successfully.', {
         accessToken,
-        user: payload,
+        user: userData,
       }),
     );
   } catch (err) {
@@ -127,12 +124,8 @@ exports.postGoogleSignIn = async (req, res) => {
 
     if (user) {
       if (user.idGoogle === response.sub) {
-        const payload = {
-          id: user._id,
-          email: user.email,
-          displayName: user.displayName,
-          role: user.role,
-        };
+        const payload = { ...user };
+        delete payload.password;
         const accessToken = jwt.sign(payload, process.env.SECRET_KEY);
         return res.status(200).json(
           ResponseService.response(200, 'Login Successfully.', {
@@ -161,17 +154,15 @@ exports.postGoogleSignIn = async (req, res) => {
 
     const newUser = newUserResponse.ops[0];
 
-    const payload = {
-      id: newUser._id,
-      email: newUser.email,
-      displayName: newUser.displayName,
-    };
+    const payload = { _id: newUser._id };
+    const userData = { ...newUser };
+    delete userData.password;
 
     const accessToken = jwt.sign(payload, process.env.SECRET_KEY);
     return res.status(200).json(
       ResponseService.response(200, 'Login Successfully.', {
         accessToken,
-        user: payload,
+        user: userData,
       }),
     );
 
@@ -224,12 +215,8 @@ exports.postFacebookSignin = async (req, res) => {
     });
 
     if (user) {
-      const payload = {
-        id: user._id,
-        email: user.email,
-        displayName: user.displayName,
-        role: user.role,
-      };
+      const payload = { ...user };
+      delete payload.password;
       const accessToken = jwt.sign(payload, process.env.SECRET_KEY);
       return res.status(200).json(
         ResponseService.response(200, 'Login Successfully.', {
@@ -249,16 +236,14 @@ exports.postFacebookSignin = async (req, res) => {
 
     const newUser = newUserResponse.ops[0];
 
-    const payload = {
-      id: newUser._id,
-      email: newUser.email,
-      displayName: newUser.displayName,
-    };
+    const userData = { ...newUser };
+    delete userData.password;
+    const payload = { _id: newUser._id };
     const accessToken = jwt.sign(payload, process.env.SECRET_KEY);
     return res.status(200).json(
       ResponseService.response(200, 'Login Successfully.', {
         accessToken,
-        user: payload,
+        user: userData,
       }),
     );
   } catch (err) {

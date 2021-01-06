@@ -1,7 +1,7 @@
 require('dotenv').config();
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
-const got = require('got');
+
 const { ResponseService, UserService } = require('../../services');
 
 exports.postSignInAdmin = async (req, res) => {

@@ -13,8 +13,8 @@ module.exports = (passport) => {
   passport.use(
     new JwtStrategy(opts, (jwt_payload, done) => {
       UserService.findOne(
-        { _id: ObjectId(jwt_payload.id) },
-        { projection: { password: 0 } }
+        { _id: ObjectId(jwt_payload._id) },
+        { projection: { password: 0 } },
       )
         .then((user) => {
           if (user) {
@@ -23,16 +23,16 @@ module.exports = (passport) => {
           return done(
             null,
             false,
-            ResponseService.error(400, 'Invalid Token Provided')
+            ResponseService.error(400, 'Invalid Token Provided'),
           );
         })
         .catch((err) =>
           done(
             null,
             false,
-            ResponseService.error(500, 'Internal Server Error', err)
-          )
+            ResponseService.error(500, 'Internal Server Error', err),
+          ),
         );
-    })
+    }),
   );
 };

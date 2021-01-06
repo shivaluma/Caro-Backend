@@ -1,4 +1,5 @@
 const roomService = require('../services/RoomService');
+const userService = require('../services/UserService');
 
 module.exports = (socket, io) => {
   socket.on('create-room', ({ _id }) => {
@@ -16,6 +17,14 @@ module.exports = (socket, io) => {
         chats: [],
         board: null,
         createdAt: new Date(),
+        userTurn: null,
+        next: null,
+        lastTick: null,
+        started: false,
+        ready: {
+          firstPlayer: false,
+          secondPlayer: false,
+        },
       };
     }
     socket.emit('created-room-info', {
@@ -51,17 +60,45 @@ module.exports = (socket, io) => {
     });
   });
 
+  socket.on('press-start', ({ roomId, pos }) => {
+    const room = roomService.rooms[Number(roomId)];
+    if (pos === 1) {
+      room.ready.firstPlayer = true;
+    } else {
+      room.ready.secondPlayer = true;
+    }
+
+    if (room.ready.firstPlayer && room.ready.secondPlayer) {
+      room.started = true;
+    }
+
+    io.to(`room-${roomId}`).emit('press-start', { pos });
+  });
+
   socket.on('game-end', ({ board, roomId, next, lastTick }) => {
     const room = roomService.rooms[roomId];
     socket.join(`room-${roomId}`);
     const winner = next ? room.firstPlayer : room.secondPlayer;
+    const loser = next ? room.secondPlayer : room.firstPlayer;
     roomService.createRoom(room, winner, board);
+    room.ready.firstPlayer = false;
+    room.ready.secondPlayer = false;
+    room.started = false;
+    userService.updateField(winner._id, {
+      point: winner.point + 25,
+      wincount: winner.wincount + 1,
+    });
+    userService.updateField(loser._id, {
+      point: loser.point - 25,
+      wincount: loser.losecount + 1,
+    });
     io.to(`room-${roomId}`).emit('game-ended', { board, next, lastTick });
   });
 
   socket.on('change-side', ({ roomId, user, side }) => {
     let leaveSide = null;
     socket.roomId = roomId;
+
     if (side === 1) {
       roomService.rooms[roomId].firstPlayer = user;
     } else if (side === 2) {
@@ -84,6 +121,8 @@ module.exports = (socket, io) => {
       socket.roomId = null;
     }
     const room = roomService.rooms[roomId];
+    room.ready.firstPlayer = false;
+    room.ready.secondPlayer = false;
     const userTurn = room.firstPlayer;
     socket
       .to(`room-${roomId}`)
