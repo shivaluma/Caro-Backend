@@ -92,6 +92,9 @@ module.exports = (socket, io) => {
       point: loser.point - 25,
       wincount: loser.losecount + 1,
     });
+    socket.room.userTurn = null;
+    socket.room.lastTick = lastTick;
+    socket.room.board = board;
     io.to(`room-${roomId}`).emit('game-ended', { board, next, lastTick });
   });
 
