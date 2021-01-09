@@ -30,6 +30,8 @@ const io = socketio(httpServer, {
   cors: {
     origin: '*',
   },
+  pingTimeout: 7000,
+  pingInterval: 5000,
   transports: ['websocket'],
 });
 io.adapter(redisAdapter);
@@ -42,7 +44,6 @@ app.use(expressLogger);
 
 app.use(passport.initialize());
 require('./config/passport')(passport);
-
 
 app.use('/api/v1', router);
 app.use('*', (req, res) =>

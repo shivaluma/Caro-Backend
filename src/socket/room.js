@@ -1,8 +1,10 @@
 const roomService = require('../services/RoomService');
 const userService = require('../services/UserService');
 
+const timeOutMap = {};
+
 module.exports = (socket, io) => {
-  socket.on('create-room', ({ _id }) => {
+  socket.on('create-room', ({ user, option }) => {
     const roomId =
       socket.roomId ||
       roomService.rooms.findIndex(
@@ -15,31 +17,45 @@ module.exports = (socket, io) => {
         secondPlayer: null,
         roomId,
         chats: [],
+        owner: user,
+        people: [user],
         board: null,
         createdAt: new Date(),
         userTurn: null,
         next: null,
         lastTick: null,
         started: false,
+        rules: {
+          min: 5,
+        },
         ready: {
           firstPlayer: false,
           secondPlayer: false,
         },
+        ...option,
       };
     }
+
+    clearTimeout(timeOutMap[Number[roomId]]);
+
     socket.emit('created-room-info', {
       room: roomService.rooms[roomId],
     });
 
-    // socket.broadcast.emit('new-room', {
-    //   room: roomService.rooms[roomId],
-    // });
+    socket.broadcast.emit('new-room', {
+      room: roomService.rooms[roomId],
+    });
   });
 
   socket.on('join-room', ({ roomId, user }) => {
     socket.join(`room-${roomId}`);
+
     socket.room = roomService.rooms[roomId];
-    socket.to(`room-${roomId}`).emit('user-join-room', user);
+    if (!socket.room) return;
+    if (socket.room.people.findIndex((u) => u._id === user._id) === -1) {
+      socket.room.people.push(user);
+      socket.to(`room-${roomId}`).emit('user-join-room', user);
+    }
   });
 
   socket.on('room-change', ({ board, roomId, next, lastTick }) => {
@@ -140,9 +156,21 @@ module.exports = (socket, io) => {
     socket.to(`room-${roomId}`).emit('claim-draw-cli', { test: 'alo' });
   });
 
-  socket.on('leave-room', (roomId, user) => {
-    socket.join(`room-${roomId}`);
-
-    socket.to(`room-${roomId}`).emit('user-join-room', user);
+  socket.on('user-leave-room', ({ roomId, user }) => {
+    socket.to(`room-${roomId}`).emit('user-leave-room', user);
+    let { room } = socket;
+    if (!room) room = roomService.rooms[roomId];
+    if (!room) return;
+    const index = room.people.findIndex((el) => el._id === user._id);
+    if (index !== -1) room.people.splice(index, 1);
+    if (room.people.length === 0) {
+      timeOutMap[Number(roomId)] = setTimeout(() => {
+        roomService.rooms[roomId] = null;
+        room = null;
+        io.emit('clear-room', roomId);
+      }, 500);
+    }
+    socket.room = null;
+    socket.leave(`room-${roomId}`);
   });
 };
