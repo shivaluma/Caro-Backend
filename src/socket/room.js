@@ -39,7 +39,6 @@ module.exports = (socket, io) => {
   socket.on('join-room', ({ roomId, user }) => {
     socket.join(`room-${roomId}`);
     socket.room = roomService.rooms[roomId];
-
     socket.to(`room-${roomId}`).emit('user-join-room', user);
   });
 
@@ -75,7 +74,7 @@ module.exports = (socket, io) => {
     io.to(`room-${roomId}`).emit('press-start', { pos });
   });
 
-  socket.on('game-end', ({ board, roomId, next, lastTick }) => {
+  socket.on('game-end', ({ board, roomId, next, lastTick, lose }) => {
     const room = roomService.rooms[roomId];
     socket.join(`room-${roomId}`);
     const winner = next ? room.firstPlayer : room.secondPlayer;
@@ -95,7 +94,12 @@ module.exports = (socket, io) => {
     socket.room.userTurn = null;
     socket.room.lastTick = lastTick;
     socket.room.board = board;
-    io.to(`room-${roomId}`).emit('game-ended', { board, next, lastTick });
+    if (lose) lastTick = lose._id === room.firstPlayer._id ? 'X' : 'O';
+    io.to(`room-${roomId}`).emit('game-ended', {
+      board,
+      next,
+      lastTick,
+    });
   });
 
   socket.on('change-side', ({ roomId, user, side }) => {
@@ -130,6 +134,10 @@ module.exports = (socket, io) => {
     socket
       .to(`room-${roomId}`)
       .emit('player-change-side', { user, roomId, side, leaveSide, userTurn });
+  });
+
+  socket.on('claim-draw', ({ roomId }) => {
+    socket.to(`room-${roomId}`).emit('claim-draw-cli', { test: 'alo' });
   });
 
   socket.on('leave-room', (roomId, user) => {
