@@ -27,7 +27,67 @@ exports.postSignUp = async (req, res) => {
     const hashedPassword = await argon2.hash(password);
 
     try {
-      await UserService.createUser(email, hashedPassword, email);
+      const user = await UserService.createUser(email, hashedPassword, email);
+
+      const randomhash = randomstring.generate();
+      const verify = await VerifyService.createVerify(
+        randomhash,
+        user._id,
+        user.email,
+      );
+      const transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+          user: 'shivaluma7@gmail.com',
+          pass: 'nguhamay',
+        },
+      });
+
+      const mainOptions = {
+        from: 'BrosCaro',
+        to: email,
+        priority: 'high',
+        subject: 'BrosCaro Registration Confirmation.',
+        text: 'Registration Confirmation',
+        html: `<table width="100%" border="0" cellspacing="0" cellpadding="0" style="width:100% !important;">
+            <tr><td align="center">
+          <table style="; border:1px solid #eaeaea;border-radius:5px;margin:40px 0;" width="600" border="0" cellspacing="0" cellpadding="40">
+            <tr><td align="center"><div style="font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Roboto&quot;, &quot;Oxygen&quot;, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, sans-serif;text-align:left;width:465px;">
+          
+          <table width="100%" border="0" cellspacing="0" cellpadding="0" style="width:100% !important;">
+            <tr><td align="center">
+            <div><img src="https://assets.vercel.com/email/vercel.png" width="40" height="37" alt="Vercel" /></div>
+            <h1 style="color:#000;font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Roboto&quot;, &quot;Oxygen&quot;, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, sans-serif;font-size:24px;font-weight:normal;margin:30px 0;padding:0;">Active account from <b>BrosCode</b></h1>
+          </td></tr>
+          </table>
+          
+          <p style="color:#000;font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Roboto&quot;, &quot;Oxygen&quot;, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, sans-serif;font-size:14px;line-height:24px;">Hello <b> ${email}</b>,</p>
+          <p style="color:#000;font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Roboto&quot;, &quot;Oxygen&quot;, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, sans-serif;font-size:14px;line-height:24px;">This is the link to active your account : </p>
+  
+         
+          
+          <a href="http://localhost:3000/active-account?email=${user.email}&token=${randomhash}">http://localhost:3000/active-account?email=${user.email}&token=${randomhash}</a>
+          
+          
+         <br />
+  
+          If you think you received this email by mistake, feel free to ignore it.
+          Thanks,
+          BrosTeam.
+          <hr style="border:none;border-top:1px solid #eaeaea;margin:26px 0;width:100%;"></hr>
+          </div></td></tr>
+          </table>
+          </td></tr>
+          </table>`,
+      };
+      transporter.sendMail(mainOptions, (err, info) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log(`Sent:${info.response}`);
+        }
+      });
+
       return res
         .status(201)
         .json(
@@ -353,7 +413,6 @@ exports.postForgotPassword = async (req, res) => {
       ),
     );
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       message: 'Some error occurs, please contact the administrator for help.',
     });
@@ -416,4 +475,107 @@ exports.changeNewPassword = async (req, res) => {
       // eslint-disable-next-line global-require
     ),
   );
+};
+
+exports.postResendEmail = async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: 'Please input email!' });
+
+  try {
+    const randomhash = randomstring.generate();
+    const user = await UserService.findOne({
+      email,
+    });
+
+    if (!user)
+      return res.status(404).json(
+        ResponseService.error(
+          404,
+          'Cannot find account with this email.',
+          // eslint-disable-next-line global-require
+        ),
+      );
+
+    const verify = await VerifyService.createVerify(
+      randomhash,
+      user._id,
+      user.email,
+    );
+
+    if (!verify) {
+      return res.status(500).json(
+        ResponseService.error(
+          500,
+          'Something went wrong.',
+
+          // eslint-disable-next-line global-require
+        ),
+      );
+    }
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: 'shivaluma7@gmail.com',
+        pass: 'nguhamay',
+      },
+    });
+
+    const mainOptions = {
+      from: 'BrosCaro',
+      to: email,
+      priority: 'high',
+      subject: 'BrosCaro Account Verification',
+      text: 'Active account',
+      html: `<table width="100%" border="0" cellspacing="0" cellpadding="0" style="width:100% !important;">
+          <tr><td align="center">
+        <table style="; border:1px solid #eaeaea;border-radius:5px;margin:40px 0;" width="600" border="0" cellspacing="0" cellpadding="40">
+          <tr><td align="center"><div style="font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Roboto&quot;, &quot;Oxygen&quot;, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, sans-serif;text-align:left;width:465px;">
+        
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="width:100% !important;">
+          <tr><td align="center">
+          <div><img src="https://assets.vercel.com/email/vercel.png" width="40" height="37" alt="Vercel" /></div>
+          <h1 style="color:#000;font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Roboto&quot;, &quot;Oxygen&quot;, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, sans-serif;font-size:24px;font-weight:normal;margin:30px 0;padding:0;">Active account from <b>BrosCode</b></h1>
+        </td></tr>
+        </table>
+        
+        <p style="color:#000;font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Roboto&quot;, &quot;Oxygen&quot;, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, sans-serif;font-size:14px;line-height:24px;">Hello <b> ${user.email}</b>,</p>
+        <p style="color:#000;font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Roboto&quot;, &quot;Oxygen&quot;, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, sans-serif;font-size:14px;line-height:24px;">This is the link to active your account: </p>
+
+       
+        
+        <a href="http://localhost:3000/active-account?email=${user.email}&token=${randomhash}">http://localhost:3000/active-account?email=${user.email}&token=${randomhash}</a>
+        
+        
+       <br />
+
+        If you think you received this email by mistake, feel free to ignore it.
+        Thanks,
+        BrosTeam.
+        <hr style="border:none;border-top:1px solid #eaeaea;margin:26px 0;width:100%;"></hr>
+        </div></td></tr>
+        </table>
+        </td></tr>
+        </table>`,
+    };
+    transporter.sendMail(mainOptions, (err, info) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log(`Sent:${info.response}`);
+      }
+    });
+
+    res.status(201).json(
+      ResponseService.response(
+        201,
+        'Request successfully.',
+        null,
+        // eslint-disable-next-line global-require
+      ),
+    );
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Some error occurs, please contact the administrator for help.',
+    });
+  }
 };

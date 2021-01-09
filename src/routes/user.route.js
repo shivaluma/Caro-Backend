@@ -10,6 +10,7 @@ router.get('/profile-full', UserController.getFullProfile);
 router.get('/leaderboard', UserController.getLeaderboard);
 router.put('/', authenticate, UserController.putUpdateProfile);
 router.put('/password', authenticate, UserController.changePassword);
+router.put('/active-account', UserController.activeAccount);
 
 // router.put('/', authenticate, UserController.getMe);
 module.exports = router;

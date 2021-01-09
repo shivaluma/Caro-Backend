@@ -10,13 +10,14 @@ module.exports = {
         role: 'user',
         displayName,
         idGoogle,
+        active: false,
         idFacebook,
         point: 1000,
         wincount: 0,
         losecount: 0,
         drawcount: 0,
       });
-      return user;
+      return user.ops[0];
     } catch (err) {
       throw new Error(err);
     }

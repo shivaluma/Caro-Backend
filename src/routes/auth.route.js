@@ -10,6 +10,7 @@ router.get('/check-field', AuthController.getValidField);
 router.get('/check-token', AuthController.getCheckToken);
 router.post('/change-password', AuthController.changeNewPassword);
 router.post('/forgot-password', AuthController.postForgotPassword);
+router.post('/resend-email', AuthController.postResendEmail);
 // admin route
 router.post('/admin/signin', AdminAuthController.postSignInAdmin);
 module.exports = router;

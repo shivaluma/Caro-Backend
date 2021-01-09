@@ -1,6 +1,6 @@
 const argon2 = require('argon2');
 
-const { ResponseService, UserService } = require('../services');
+const { ResponseService, UserService, VerifyService } = require('../services');
 const onlinelist = require('../services/OnlineService');
 const redis = require('../config/redis');
 
@@ -130,5 +130,36 @@ exports.getLeaderboard = async (req, res) => {
         // eslint-disable-next-line global-require
       ),
     );
+  }
+};
+
+exports.activeAccount = async (req, res) => {
+  const { token, email } = req.body;
+
+  const tokenIns = await VerifyService.findOne({
+    token,
+    email,
+  });
+
+  if (!tokenIns) {
+    return res
+      .status(400)
+      .json(ResponseService.error(400, 'Invalid Token.', false));
+  }
+
+  await VerifyService.deleteOne({
+    token,
+    email,
+  });
+
+  try {
+    await UserService.updateFieldByCustomQuery({ email }, { active: true });
+    return res
+      .status(200)
+      .json(ResponseService.error(200, 'Active account successfully.', true));
+  } catch (err) {
+    return res
+      .status(400)
+      .json(ResponseService.error(400, 'Active account failed.', true));
   }
 };
