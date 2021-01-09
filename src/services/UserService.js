@@ -43,6 +43,19 @@ module.exports = {
     return user.value;
   },
 
+  updateFieldByCustomQuery: async (query, update) => {
+    const user = await getCollection('users').findOneAndUpdate(
+      query,
+      { $set: { ...update } },
+      {
+        returnNewDocument: true,
+        returnOriginal: false,
+        projection: { password: 0 },
+      },
+    );
+    return user.value;
+  },
+
   getUserWithGame: async (id) => {
     const userPromise = getCollection('users').findOne(
       {
@@ -62,5 +75,13 @@ module.exports = {
     const [user, games] = await Promise.allSettled([userPromise, gamesPromise]);
 
     return { user, games };
+  },
+
+  getLeaderboard: async () => {
+    const users = await getCollection('users')
+      .find({}, { projection: { password: 0 } })
+      .sort({ point: -1 })
+      .toArray();
+    return users;
   },
 };

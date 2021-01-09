@@ -1,4 +1,5 @@
 const argon2 = require('argon2');
+
 const { ResponseService, UserService } = require('../services');
 const onlinelist = require('../services/OnlineService');
 const redis = require('../config/redis');
@@ -97,11 +98,37 @@ exports.getFullProfile = async (req, res) => {
       ),
     );
   } catch (err) {
-    ResponseService.error(
-      400,
-      'Cannot get user profile',
+    return res.status(404).json(
+      ResponseService.error(
+        400,
+        'Cannot get user profile',
 
-      // eslint-disable-next-line global-require
+        // eslint-disable-next-line global-require
+      ),
+    );
+  }
+};
+
+exports.getLeaderboard = async (req, res) => {
+  try {
+    const data = await UserService.getLeaderboard();
+
+    return res.status(200).json(
+      ResponseService.response(
+        200,
+        'Get leaderboards successfully.',
+        data,
+        // eslint-disable-next-line global-require
+      ),
+    );
+  } catch (err) {
+    return res.status(404).json(
+      ResponseService.error(
+        400,
+        'Cannot get leaderboards',
+
+        // eslint-disable-next-line global-require
+      ),
     );
   }
 };
