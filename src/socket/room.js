@@ -83,18 +83,33 @@ module.exports = (socket, io) => {
     room.ready.firstPlayer = false;
     room.ready.secondPlayer = false;
     room.started = false;
-    userService.updateField(winner._id, {
-      point: winner.point + 25,
-      wincount: winner.wincount + 1,
-    });
-    userService.updateField(loser._id, {
-      point: loser.point - 25,
-      wincount: loser.losecount + 1,
-    });
+    if (lose == null) {
+      userService.updateField(winner._id, {
+        point: winner.point + 10,
+        drawcount: winner.drawcount + 1,
+      });
+      userService.updateField(loser._id, {
+        point: loser.point + 10,
+        drawcount: loser.drawcount + 1,
+      });
+    } else {
+      userService.updateField(winner._id, {
+        point: winner.point + 25,
+        wincount: winner.wincount + 1,
+      });
+      userService.updateField(loser._id, {
+        point: loser.point - 25,
+        losecount: loser.losecount + 1,
+      });
+    }
     socket.room.userTurn = null;
     socket.room.lastTick = lastTick;
     socket.room.board = board;
-    if (lose) lastTick = lose._id === room.firstPlayer._id ? 'X' : 'O';
+    if (lose === 'draw') {
+      next = null;
+    } else {
+      next = lose._id === room.firstPlayer._id;
+    }
     io.to(`room-${roomId}`).emit('game-ended', {
       board,
       next,
