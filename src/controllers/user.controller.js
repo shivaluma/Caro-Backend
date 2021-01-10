@@ -1,7 +1,12 @@
 const argon2 = require('argon2');
 
-const { ResponseService, UserService, VerifyService } = require('../services');
-const onlinelist = require('../services/OnlineService');
+const {
+  ResponseService,
+  UserService,
+  VerifyService,
+  OnlineService,
+} = require('../services');
+
 const redis = require('../config/redis');
 
 exports.getMe = async (req, res) => {
@@ -70,17 +75,27 @@ exports.putUpdateProfile = async (req, res) => {
 };
 
 exports.getOnline = async (req, res) => {
-  const list = req.user
-    ? [...onlinelist].filter((email) => email !== req.user.email)
-    : [...onlinelist];
-  return res.status(200).json(
-    ResponseService.response(
-      200,
-      'Online List',
-      list,
-      // eslint-disable-next-line global-require
-    ),
-  );
+  try {
+    const userOnline = await OnlineService.getUsersOnline();
+    console.log(userOnline);
+    return res.status(200).json(
+      ResponseService.response(
+        200,
+        'Online List',
+        userOnline,
+        // eslint-disable-next-line global-require
+      ),
+    );
+  } catch (err) {
+    return res.status(200).json(
+      ResponseService.response(
+        200,
+        'Online List',
+        [],
+        // eslint-disable-next-line global-require
+      ),
+    );
+  }
 };
 
 exports.getFullProfile = async (req, res) => {

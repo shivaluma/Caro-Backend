@@ -30,8 +30,7 @@ const io = socketio(httpServer, {
   cors: {
     origin: '*',
   },
-  pingTimeout: 7000,
-  pingInterval: 5000,
+
   transports: ['websocket'],
 });
 io.adapter(redisAdapter);

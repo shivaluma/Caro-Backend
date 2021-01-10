@@ -11,7 +11,8 @@ module.exports = (socket, io) => {
       roomService.rooms.findIndex(
         (r) =>
           r === null ||
-          (r.firstPlayer === null &&
+          ((!r.owner || r.owner._id === user._id) &&
+            r.firstPlayer === null &&
             r.secondPlayer === null &&
             !option.password),
       );
@@ -84,6 +85,7 @@ module.exports = (socket, io) => {
 
   socket.on('press-start', ({ roomId, pos }) => {
     const room = roomService.rooms[Number(roomId)];
+
     if (pos === 1) {
       room.ready.firstPlayer = true;
     } else {
@@ -99,6 +101,7 @@ module.exports = (socket, io) => {
 
   socket.on('game-end', ({ board, roomId, next, lastTick, lose }) => {
     const room = roomService.rooms[roomId];
+    if (!room || !room.firstPlayer || !room.secondPlayer) return;
     socket.join(`room-${roomId}`);
     const winner = next ? room.firstPlayer : room.secondPlayer;
     const loser = next ? room.secondPlayer : room.firstPlayer;
