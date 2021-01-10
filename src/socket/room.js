@@ -1,17 +1,24 @@
+const argon = require('argon2');
 const roomService = require('../services/RoomService');
 const userService = require('../services/UserService');
 
 const timeOutMap = {};
 
 module.exports = (socket, io) => {
-  socket.on('create-room', ({ user, option }) => {
+  socket.on('create-room', async ({ user, option }) => {
     const roomId =
       socket.roomId ||
       roomService.rooms.findIndex(
         (r) =>
-          r === null || (r.firstPlayer === null && r.secondPlayer === null),
+          r === null ||
+          (r.firstPlayer === null &&
+            r.secondPlayer === null &&
+            !option.password),
       );
     if (!roomService.rooms[roomId]) {
+      if (option.password) {
+        option.password = await argon.hash(option.password);
+      }
       roomService.rooms[roomId] = {
         firstPlayer: null,
         secondPlayer: null,
@@ -121,7 +128,7 @@ module.exports = (socket, io) => {
   socket.on('change-side', ({ roomId, user, side }) => {
     let leaveSide = null;
     socket.roomId = roomId;
-
+    if (!roomService.rooms[roomId]) return;
     if (side === 1) {
       roomService.rooms[roomId].firstPlayer = user;
     } else if (side === 2) {
@@ -168,7 +175,7 @@ module.exports = (socket, io) => {
         roomService.rooms[roomId] = null;
         room = null;
         io.emit('clear-room', roomId);
-      }, 500);
+      }, 0);
     }
     socket.room = null;
     socket.leave(`room-${roomId}`);
