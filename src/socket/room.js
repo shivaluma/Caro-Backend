@@ -12,6 +12,7 @@ module.exports = (socket, io) => {
           ((!r.owner || r.owner._id === user._id) &&
             r.firstPlayer === null &&
             r.secondPlayer === null &&
+            !r.password &&
             !option.password),
       );
     if (!roomService.rooms[roomId]) {
