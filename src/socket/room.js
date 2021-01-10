@@ -39,6 +39,7 @@ module.exports = (socket, io) => {
           firstPlayer: false,
           secondPlayer: false,
         },
+        move: [],
         ...option,
       };
     }
@@ -73,12 +74,14 @@ module.exports = (socket, io) => {
     socket.room.next = next;
     socket.room.lastTick = lastTick;
     socket.room.userTurn = user;
+    socket.room.move.push(lastTick);
     socket.join(`room-${roomId}`);
-    io.to(`room-${roomId}`).emit('room-changed', {
+    io.to(`room-${roomId}`).emit('room-change-cli', {
       board,
       next,
       user,
       lastTick,
+      move: socket.room.move,
     });
   });
 
@@ -130,13 +133,14 @@ module.exports = (socket, io) => {
     socket.room.board = board;
     if (lose === 'draw') {
       next = null;
-    } else {
-      next = lose._id === room.firstPlayer._id;
+    } else if (lose) {
+      next = lose._id !== room.firstPlayer._id;
     }
-    io.to(`room-${roomId}`).emit('game-ended', {
+    io.to(`room-${roomId}`).emit('game-end-cli', {
       board,
       next,
       lastTick,
+      move: socket.room.move,
     });
   });
 
@@ -175,7 +179,7 @@ module.exports = (socket, io) => {
   });
 
   socket.on('claim-draw', ({ roomId }) => {
-    socket.to(`room-${roomId}`).emit('claim-draw-cli', { test: 'alo' });
+    socket.to(`room-${roomId}`).emit('claim-draw-cli');
   });
 
   socket.on('user-leave-room', ({ roomId, user }) => {
