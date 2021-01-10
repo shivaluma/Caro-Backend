@@ -2,8 +2,6 @@ const argon = require('argon2');
 const roomService = require('../services/RoomService');
 const userService = require('../services/UserService');
 
-const timeOutMap = {};
-
 module.exports = (socket, io) => {
   socket.on('create-room', async ({ user, option }) => {
     const roomId =
@@ -44,8 +42,6 @@ module.exports = (socket, io) => {
       };
     }
 
-    clearTimeout(timeOutMap[Number[roomId]]);
-
     socket.emit('created-room-info', {
       room: roomService.rooms[roomId],
     });
@@ -58,8 +54,16 @@ module.exports = (socket, io) => {
   socket.on('join-room', ({ roomId, user }) => {
     socket.join(`room-${roomId}`);
 
+    if (socket.room) {
+      socket.room.people = socket.room.people.filter(
+        (el) => el._id !== user._id,
+      );
+      socket.to(`room-${socket.room.roomId}`).emit('user-leave-room', user);
+    }
+
     socket.room = roomService.rooms[roomId];
     if (!socket.room) return;
+    socket.room.roomId = roomId;
     if (socket.room.people.findIndex((u) => u._id === user._id) === -1) {
       socket.room.people.push(user);
       socket.to(`room-${roomId}`).emit('user-join-room', user);
@@ -174,7 +178,7 @@ module.exports = (socket, io) => {
     const index = room.people.findIndex((el) => el._id === user._id);
     if (index !== -1) room.people.splice(index, 1);
     if (room.people.length === 0) {
-      timeOutMap[Number(roomId)] = setTimeout(() => {
+      setTimeout(() => {
         roomService.rooms[roomId] = null;
         room = null;
         io.emit('clear-room', roomId);
