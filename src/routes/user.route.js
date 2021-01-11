@@ -15,9 +15,9 @@ router.put('/password', authenticate, UserController.changePassword);
 router.put('/active-account', UserController.activeAccount);
 
 // admin route
-router.get('/admin/users', AdminMiddleWare, AdminController.getAllUsers);
-router.get('/admin/users/search', AdminMiddleWare, AdminController.searchUser);
-router.get('/admin/user/:id', AdminMiddleWare, AdminController.getUserById);
-router.post('/admin/user/:id', AdminMiddleWare, AdminController.updateUserById);
+router.get('/admin', AdminMiddleWare, AdminController.getAllUsers);
+router.get('/admin/search', AdminMiddleWare, AdminController.searchUser);
+router.get('/admin/:userId', AdminMiddleWare, AdminController.getUserById);
+router.post('/admin/:userId', AdminMiddleWare, AdminController.updateUserById);
 
 module.exports = router;
