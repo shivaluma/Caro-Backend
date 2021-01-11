@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const passport = require('passport');
 const UserController = require('../controllers/user.controller');
+const AdminMiddleWare = require('../middleware/admin-auth.middleware');
+const AdminController = require('../controllers/admin/auth.controller');
 
 const authenticate = passport.authenticate('jwt', { session: false });
 
@@ -12,5 +14,10 @@ router.put('/', authenticate, UserController.putUpdateProfile);
 router.put('/password', authenticate, UserController.changePassword);
 router.put('/active-account', UserController.activeAccount);
 
-// router.put('/', authenticate, UserController.getMe);
+// admin route
+router.get('/admin/users', AdminMiddleWare, AdminController.getAllUsers);
+router.get('/admin/users/search', AdminMiddleWare, AdminController.searchUser);
+router.get('/admin/user/:id', AdminMiddleWare, AdminController.getUserById);
+router.post('/admin/user/:id', AdminMiddleWare, AdminController.updateUserById);
+
 module.exports = router;
