@@ -217,4 +217,55 @@ module.exports = (socket, io) => {
     socket.room = null;
     socket.leave(`room-${roomId}`);
   });
+
+  socket.on('quick-match', async ({ user, option }) => {
+    let roomId = null;
+    if (!io.quickMatch) {
+      io.quickMatch = [];
+    }
+    if (io.quickMatch.findIndex((el) => el._id === user._id) === -1) {
+      await io.quickMatch.push(user);
+    }
+
+    if (io.quickMatch.length === 2) {
+      roomId =
+        socket.roomId ||
+        roomService.rooms.findIndex(
+          (r) =>
+            r === null ||
+            ((!r.owner || r.owner._id === user._id) &&
+              r.firstPlayer === null &&
+              r.secondPlayer === null &&
+              !r.password &&
+              !option.password),
+        );
+      if (!roomService.rooms[roomId]) {
+        roomService.rooms[roomId] = {
+          firstPlayer: null,
+          secondPlayer: null,
+          roomId,
+          chats: [],
+          owner: io.quickMatch[0],
+          people: io.quickMatch,
+          board: null,
+          createdAt: new Date(),
+          userTurn: null,
+          next: null,
+          lastTick: null,
+          started: false,
+          rules: {
+            min: 5,
+          },
+          ready: {
+            firstPlayer: false,
+            secondPlayer: false,
+          },
+          move: [],
+          ...option,
+        };
+      }
+      io.quickMatch = null;
+    }
+    io.emit('quick-match-cli', { roomId });
+  });
 };
