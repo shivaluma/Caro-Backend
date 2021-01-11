@@ -3,13 +3,15 @@ const getCollection = require('../utils/getCollection');
 
 module.exports = {
   getAllUsers: async () => {
-    try {
-      const user = await getCollection('users').find({
-        role: 'user',
-      });
-      return user.toArray();
-    } catch (err) {
-      throw new Error(err);
-    }
+    const users = await getCollection('users').find({
+      role: 'user',
+    });
+    return users.toArray();
+  },
+  getUserById: async (id) => {
+    const user = await getCollection('users').findOne({
+      _id: id,
+    });
+    return user;
   },
 };
