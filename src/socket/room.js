@@ -117,7 +117,7 @@ module.exports = (socket, io) => {
     room.ready.firstPlayer = false;
     room.ready.secondPlayer = false;
     room.started = false;
-    if (lose == null) {
+    if (lose === 'draw') {
       userService.updateField(winner._id, {
         point: winner.point + 10,
         drawcount: winner.drawcount + 1,
