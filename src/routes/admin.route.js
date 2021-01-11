@@ -1,20 +1,53 @@
 const router = require('express').Router();
+const passport = require('passport');
 const AdminAuthController = require('../controllers/admin/auth.controller');
 const AdminController = require('../controllers/admin/admin.controller');
 const AdminMiddleWare = require('../middleware/admin-auth.middleware');
 
+const authenticate = passport.authenticate('jwt', { session: false });
+
 router.post('/signin', AdminAuthController.postSignInAdmin);
-router.get('/matchs', AdminMiddleWare, AdminController.getAllHistory);
+router.get(
+  '/matchs',
+  authenticate,
+  AdminMiddleWare,
+  AdminController.getAllHistory,
+);
 router.get(
   '/match/:userId',
   AdminMiddleWare,
   AdminController.getHistoryByUserId,
 );
-router.get('/chat/:matchId', AdminMiddleWare, AdminController.getChatByMatchId);
+router.get(
+  '/chat/:matchId',
+  authenticate,
+  AdminMiddleWare,
+  AdminController.getChatByMatchId,
+);
 
-router.get('/users', AdminMiddleWare, AdminController.getAllUsers);
-router.get('/users/search', AdminMiddleWare, AdminController.searchUser);
-router.get('/user/:userId', AdminMiddleWare, AdminController.getUserById);
-router.post('/user/:userId', AdminMiddleWare, AdminController.updateUserById);
+router.get(
+  '/users',
+  authenticate,
+  AdminMiddleWare,
+  AdminController.getAllUsers,
+);
+router.get(
+  '/users/search',
+  authenticate,
+  AdminMiddleWare,
+  AdminController.searchUser,
+);
+router.get(
+  '/user/:userId',
+  authenticate,
+  AdminMiddleWare,
+  AdminController.getUserById,
+);
+router.post(
+  '/user/:userId',
+  authenticate,
+  AdminMiddleWare,
+  AdminController.updateUserById,
+);
 
 module.exports = router;

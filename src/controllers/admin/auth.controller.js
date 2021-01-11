@@ -34,14 +34,14 @@ exports.postSignInAdmin = async (req, res) => {
         .json(ResponseService.error(400, 'Wrong email or password.', null));
     }
 
-    if (user.role !== 'Admin') {
+    if (user.role !== 'admin') {
       return res
         .status(403)
         .json(ResponseService.error(403, 'Does not have permission.'));
     }
 
     const payload = {
-      id: user._id,
+      _id: user._id,
       email: user.email,
       displayName: user.displayName,
       role: user.role,
