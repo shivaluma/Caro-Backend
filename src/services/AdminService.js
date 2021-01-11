@@ -24,4 +24,11 @@ module.exports = {
     const history = await getCollection('rooms').find({});
     return history.toArray();
   },
+  updateUserById: async (id, user) => {
+    const updated = await getCollection.updateOne(
+      { _id: ObjectId(id) },
+      { $set: { user } },
+    );
+    return updated;
+  },
 };

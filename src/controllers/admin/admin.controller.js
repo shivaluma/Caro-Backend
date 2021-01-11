@@ -13,19 +13,30 @@ exports.getAllUsers = async (req, res) => {
 
 exports.getAllHistory = async (req, res) => {
   try {
-    const history = await AdminService.getAllHistory();
-    return res.status(200).json(ResponseService.response(200, null, history));
+    const histories = await AdminService.getAllHistory();
+    return res.status(200).json(ResponseService.response(200, null, histories));
   } catch (error) {
     return res
       .status(400)
-      .json(ResponseService.error(400, 'Can not get all history', error));
+      .json(ResponseService.error(400, 'Can not get all histories', error));
   }
 };
 exports.getHistoryByUserId = () => {};
 
-exports.getChatByMatchId = () => {};
+exports.getChatByMatchId = async (req, res) => {
+  const { matchId } = req.params;
+  try {
+    const chat = await AdminService.getChatByMatchId(matchId);
+    return res.status(200).json(ResponseService.response(200, null, chat));
+  } catch (error) {
+    return res
+      .status(400)
+      .json(ResponseService.error(400, 'Can not get this chat history', error));
+  }
+};
 
 exports.searchUser = () => {};
+
 exports.getUserById = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -37,4 +48,15 @@ exports.getUserById = async (req, res) => {
       .json(ResponseService.error(400, 'Can not find this user', error));
   }
 };
-exports.updateUserById = () => {};
+exports.updateUserById = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { user } = req.body;
+    const updated = AdminService.updateUserById(userId, user);
+    return res.status(200).json(ResponseService.response(200, null, updated));
+  } catch (error) {
+    return res
+      .status(400)
+      .json(ResponseService.error(400, 'Can not update this user', error));
+  }
+};
