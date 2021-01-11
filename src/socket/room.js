@@ -268,4 +268,8 @@ module.exports = (socket, io) => {
     }
     io.emit('quick-match-cli', { roomId });
   });
+
+  socket.on('cancel-quick-match', async ({ user }) => {
+    io.quickMatch = io.quickMatch.filter((el) => el._id !== user._id);
+  });
 };
