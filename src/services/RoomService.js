@@ -12,13 +12,15 @@ module.exports = {
     const room = await getCollection('rooms').findById(ObjectId(id));
     return room;
   },
-  createRoom: async (room, winner, board) => {
+  createRoom: async (room, winner, board, move) => {
     const res = await getCollection('rooms').insertOne({
       firstPlayer: room.firstPlayer,
       secondPlayer: room.secondPlayer,
       chats: room.chats,
       winner,
       board,
+      createAt: new Date(),
+      move,
     });
     return res;
   },

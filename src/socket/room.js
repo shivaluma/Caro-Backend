@@ -123,7 +123,8 @@ module.exports = (socket, io) => {
           winner = lose;
         }
     }
-    roomService.createRoom(room, winner, board);
+    socket.room.move.push(lastTick);
+    roomService.createRoom(room, winner, board, socket.room.move);
     room.ready.firstPlayer = false;
     room.ready.secondPlayer = false;
     room.started = false;
