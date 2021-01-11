@@ -125,6 +125,7 @@ module.exports = (socket, io) => {
     }
     socket.room.move.push(lastTick);
     roomService.createRoom(room, winner, board, socket.room.move);
+    socket.room.chats = [];
     room.ready.firstPlayer = false;
     room.ready.secondPlayer = false;
     room.started = false;
