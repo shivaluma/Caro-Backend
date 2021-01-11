@@ -72,10 +72,13 @@ module.exports = (socket, io) => {
     }
   });
 
-  socket.on('room-change', ({ board, roomId, next, lastTick }) => {
+  socket.on('room-change', ({ board, roomId, next, lastTick, move }) => {
     const room = roomService.rooms[roomId];
+    if (!room || !room.firstPlayer || !room.secondPlayer) return;
     const user = next ? room.secondPlayer : room.firstPlayer;
-
+    if (move === 'reset') {
+      socket.room.move = [];
+    }
     socket.room.board = board;
     socket.room.next = next;
     socket.room.lastTick = lastTick;
@@ -111,19 +114,26 @@ module.exports = (socket, io) => {
     const room = roomService.rooms[roomId];
     if (!room || !room.firstPlayer || !room.secondPlayer) return;
     socket.join(`room-${roomId}`);
-    const winner = next ? room.firstPlayer : room.secondPlayer;
-    const loser = next ? room.secondPlayer : room.firstPlayer;
+    let winner = next ? room.firstPlayer : room.secondPlayer;
+    let loser = next ? room.secondPlayer : room.firstPlayer;
+    if (lose) {
+      if (lose._id)
+        if (lose._id !== loser._id) {
+          loser = winner;
+          winner = lose;
+        }
+    }
     roomService.createRoom(room, winner, board);
     room.ready.firstPlayer = false;
     room.ready.secondPlayer = false;
     room.started = false;
     if (lose === 'draw') {
       userService.updateField(winner._id, {
-        point: winner.point + 10,
+        point: winner.point - 10,
         drawcount: winner.drawcount + 1,
       });
       userService.updateField(loser._id, {
-        point: loser.point + 10,
+        point: loser.point - 10,
         drawcount: loser.drawcount + 1,
       });
     } else {
