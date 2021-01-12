@@ -98,11 +98,11 @@ exports.getOnline = async (req, res) => {
   }
 };
 
-exports.getFullProfile = async (req, res) => {
+exports.getProfile = async (req, res) => {
   const { id } = req.query;
 
   try {
-    const data = await UserService.getUserWithGame(id);
+    const data = await UserService.getUserInfo(id);
 
     return res.status(200).json(
       ResponseService.response(
