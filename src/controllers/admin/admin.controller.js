@@ -51,8 +51,8 @@ exports.getUserById = async (req, res) => {
 exports.updateUserById = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { user } = req.body;
-    const updated = AdminService.updateUserById(userId, user);
+    const { status } = req.body;
+    const updated = AdminService.updateUserById(userId, status);
     return res.status(200).json(ResponseService.response(200, null, updated));
   } catch (error) {
     return res

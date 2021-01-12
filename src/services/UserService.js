@@ -8,6 +8,7 @@ module.exports = {
         email,
         password,
         role: 'user',
+        status: 'active',
         displayName,
         idGoogle,
         active: false,
