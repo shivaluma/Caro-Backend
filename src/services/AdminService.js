@@ -11,6 +11,7 @@ module.exports = {
     );
     return users.toArray();
   },
+
   getUserById: async (id) => {
     const user = await getCollection('users').findOne(
       {
@@ -20,10 +21,12 @@ module.exports = {
     );
     return user;
   },
+
   getAllHistory: async () => {
-    const history = await getCollection('rooms').find({});
-    return history.toArray();
+    const histories = await getCollection('rooms').find({});
+    return histories.toArray();
   },
+
   updateUserById: async (id, status) => {
     const updated = await getCollection.findOneAndUpdate(
       { _id: ObjectId(id) },
@@ -31,5 +34,10 @@ module.exports = {
       { returnNewDocument: true, returnOriginal: false },
     );
     return updated;
+  },
+
+  getHistoryByUserId: async (id) => {
+    const history = await getCollection('rooms').findOne({ _id: ObjectId(id) });
+    return history;
   },
 };

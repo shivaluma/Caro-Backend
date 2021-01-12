@@ -21,7 +21,18 @@ exports.getAllHistory = async (req, res) => {
       .json(ResponseService.error(400, 'Can not get all histories', error));
   }
 };
-exports.getHistoryByUserId = () => {};
+
+exports.getHistoryByUserId = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const history = await AdminService.getHistoryByUserId(userId);
+    return res.status(200).json(ResponseService.response(200, null, history));
+  } catch (error) {
+    return res
+      .status(400)
+      .json(ResponseService.error(400, 'Can not get this history', error));
+  }
+};
 
 exports.getChatByMatchId = async (req, res) => {
   const { matchId } = req.params;
