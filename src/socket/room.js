@@ -75,10 +75,13 @@ module.exports = (socket, io) => {
     }
   });
 
-  socket.on('room-change', ({ board, roomId, next, lastTick }) => {
+  socket.on('room-change', ({ board, roomId, next, lastTick, move }) => {
     const room = roomService.rooms[roomId];
+    if (!room || !room.firstPlayer || !room.secondPlayer) return;
     const user = next ? room.secondPlayer : room.firstPlayer;
-
+    if (move === 'reset') {
+      socket.room.move = [];
+    }
     socket.room.board = board;
     socket.room.next = next;
     socket.room.lastTick = lastTick;
@@ -114,19 +117,28 @@ module.exports = (socket, io) => {
     const room = roomService.rooms[roomId];
     if (!room || !room.firstPlayer || !room.secondPlayer) return;
     socket.join(`room-${roomId}`);
-    const winner = next ? room.firstPlayer : room.secondPlayer;
-    const loser = next ? room.secondPlayer : room.firstPlayer;
-    roomService.createRoom(room, winner, board);
+    let winner = next ? room.firstPlayer : room.secondPlayer;
+    let loser = next ? room.secondPlayer : room.firstPlayer;
+    if (lose) {
+      if (lose._id)
+        if (lose._id !== loser._id) {
+          loser = winner;
+          winner = lose;
+        }
+    }
+    socket.room.move.push(lastTick);
+    roomService.createRoom(room, winner, board, socket.room.move);
+    socket.room.chats = [];
     room.ready.firstPlayer = false;
     room.ready.secondPlayer = false;
     room.started = false;
-    if (lose == null) {
+    if (lose === 'draw') {
       userService.updateField(winner._id, {
-        point: winner.point + 10,
+        point: winner.point - 10,
         drawcount: winner.drawcount + 1,
       });
       userService.updateField(loser._id, {
-        point: loser.point + 10,
+        point: loser.point - 10,
         drawcount: loser.drawcount + 1,
       });
     } else {
@@ -213,5 +225,60 @@ module.exports = (socket, io) => {
     }
     socket.room = null;
     socket.leave(`room-${roomId}`);
+  });
+
+  socket.on('quick-match', async ({ user, option }) => {
+    let roomId = null;
+    if (!io.quickMatch) {
+      io.quickMatch = [];
+    }
+    if (io.quickMatch.findIndex((el) => el._id === user._id) === -1) {
+      await io.quickMatch.push(user);
+    }
+
+    if (io.quickMatch.length === 2) {
+      roomId =
+        socket.roomId ||
+        roomService.rooms.findIndex(
+          (r) =>
+            r === null ||
+            ((!r.owner || r.owner._id === user._id) &&
+              r.firstPlayer === null &&
+              r.secondPlayer === null &&
+              !r.password &&
+              !option.password),
+        );
+      if (!roomService.rooms[roomId]) {
+        roomService.rooms[roomId] = {
+          firstPlayer: null,
+          secondPlayer: null,
+          roomId,
+          chats: [],
+          owner: io.quickMatch[0],
+          people: io.quickMatch,
+          board: null,
+          createdAt: new Date(),
+          userTurn: null,
+          next: null,
+          lastTick: null,
+          started: false,
+          rules: {
+            min: 5,
+          },
+          ready: {
+            firstPlayer: false,
+            secondPlayer: false,
+          },
+          move: [],
+          ...option,
+        };
+      }
+      io.quickMatch = null;
+    }
+    io.emit('quick-match-cli', { roomId });
+  });
+
+  socket.on('cancel-quick-match', async ({ user }) => {
+    io.quickMatch = io.quickMatch.filter((el) => el._id !== user._id);
   });
 };

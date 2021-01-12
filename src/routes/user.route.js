@@ -6,11 +6,13 @@ const authenticate = passport.authenticate('jwt', { session: false });
 
 router.get('/me', authenticate, UserController.getMe);
 router.get('/online', UserController.getOnline);
-router.get('/profile-full', UserController.getFullProfile);
+router.get('/profile', UserController.getProfile);
+router.get('/profile-game', UserController.getGameProfile);
 router.get('/leaderboard', UserController.getLeaderboard);
 router.put('/', authenticate, UserController.putUpdateProfile);
 router.put('/password', authenticate, UserController.changePassword);
 router.put('/active-account', UserController.activeAccount);
 
-// router.put('/', authenticate, UserController.getMe);
+// admin route
+
 module.exports = router;

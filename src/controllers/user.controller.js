@@ -98,17 +98,17 @@ exports.getOnline = async (req, res) => {
   }
 };
 
-exports.getFullProfile = async (req, res) => {
+exports.getProfile = async (req, res) => {
   const { id } = req.query;
 
   try {
-    const data = await UserService.getUserWithGame(id);
+    const user = await UserService.getUserInfo(id);
 
     return res.status(200).json(
       ResponseService.response(
         200,
         'Get profile successfully.',
-        data,
+        user,
         // eslint-disable-next-line global-require
       ),
     );
@@ -117,6 +117,32 @@ exports.getFullProfile = async (req, res) => {
       ResponseService.error(
         400,
         'Cannot get user profile',
+
+        // eslint-disable-next-line global-require
+      ),
+    );
+  }
+};
+
+exports.getGameProfile = async (req, res) => {
+  const { id } = req.query;
+
+  try {
+    const games = await UserService.getUserGames(id);
+
+    return res.status(200).json(
+      ResponseService.response(
+        200,
+        'Get profile successfully.',
+        games,
+        // eslint-disable-next-line global-require
+      ),
+    );
+  } catch (err) {
+    return res.status(404).json(
+      ResponseService.error(
+        400,
+        'Cannot get user games',
 
         // eslint-disable-next-line global-require
       ),
