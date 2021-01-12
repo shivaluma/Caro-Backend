@@ -37,16 +37,16 @@ exports.getHistoryByUserId = async (req, res) => {
 exports.getChatByMatchId = async (req, res) => {
   const { matchId } = req.params;
   try {
-    const chat = await AdminService.getChatByMatchId(matchId);
-    return res.status(200).json(ResponseService.response(200, null, chat));
+    const match = await AdminService.getMatchById(matchId);
+    return res
+      .status(200)
+      .json(ResponseService.response(200, null, match.chats));
   } catch (error) {
     return res
       .status(400)
       .json(ResponseService.error(400, 'Can not get this chat history', error));
   }
 };
-
-exports.searchUser = () => {};
 
 exports.getUserById = async (req, res) => {
   try {
@@ -69,5 +69,17 @@ exports.updateUserById = async (req, res) => {
     return res
       .status(400)
       .json(ResponseService.error(400, 'Can not update this user', error));
+  }
+};
+
+exports.getHistoryByMatchId = async (req, res) => {
+  const { matchId } = req.params;
+  try {
+    const match = await AdminService.getMatchById(matchId);
+    return res.status(200).json(ResponseService.response(200, null, match));
+  } catch (error) {
+    return res
+      .status(400)
+      .json(ResponseService.error(400, 'Can not get this history', error));
   }
 };

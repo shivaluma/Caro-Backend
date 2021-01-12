@@ -14,10 +14,17 @@ router.get(
   AdminController.getAllHistory,
 );
 router.get(
-  '/match/:userId',
+  '/match/user/:userId',
   AdminMiddleWare,
   AdminController.getHistoryByUserId,
 );
+
+router.get(
+  '/match/:matchId',
+  AdminMiddleWare,
+  AdminController.getHistoryByUserId,
+);
+
 router.get(
   '/chat/:matchId',
   authenticate,
@@ -31,18 +38,14 @@ router.get(
   AdminMiddleWare,
   AdminController.getAllUsers,
 );
-router.get(
-  '/users/search',
-  authenticate,
-  AdminMiddleWare,
-  AdminController.searchUser,
-);
+
 router.get(
   '/user/:userId',
   authenticate,
   AdminMiddleWare,
   AdminController.getUserById,
 );
+
 router.post(
   '/user/:userId',
   authenticate,

@@ -48,7 +48,7 @@ module.exports = {
     return games;
   },
 
-  getChatByMatchId: async (matchId) => {
+  getMatchById: async (matchId) => {
     const history = await getCollection('rooms').findOne({
       _id: ObjectId(matchId),
     });
