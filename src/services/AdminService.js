@@ -40,4 +40,11 @@ module.exports = {
     const history = await getCollection('rooms').findOne({ _id: ObjectId(id) });
     return history;
   },
+
+  getChatByMatchId: async (matchId) => {
+    const history = await getCollection('rooms').findOne({
+      _id: ObjectId(matchId),
+    });
+    return history;
+  },
 };
