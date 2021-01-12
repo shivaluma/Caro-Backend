@@ -54,6 +54,9 @@ module.exports = (socket, io) => {
   });
 
   socket.on('join-room', ({ roomId, user }) => {
+    // eslint-disable-next-line eqeqeq
+    if (socket?.room?.roomId === roomId) return;
+
     socket.join(`room-${roomId}`);
 
     if (socket.room) {
@@ -195,6 +198,7 @@ module.exports = (socket, io) => {
     let { room } = socket;
     if (!room) room = roomService.rooms[roomId];
     if (!room) return;
+
     const index = room.people.findIndex((el) => el._id === user._id);
     if (index !== -1) room.people.splice(index, 1);
     if (room.people.length === 0) {
@@ -203,6 +207,9 @@ module.exports = (socket, io) => {
         room = null;
         io.emit('clear-room', roomId);
       }, 0);
+    } else if (room.owner._id === user._id) {
+      [room.owner] = room.people;
+      socket.to(`room-${roomId}`).emit('room-owner-change', room.people[0]);
     }
     socket.room = null;
     socket.leave(`room-${roomId}`);

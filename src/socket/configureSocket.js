@@ -13,7 +13,7 @@ const setupSocket = (io) => {
       socket.disconnect();
     });
     // integrate online module
-    online(socket);
+    online(socket, io);
     room(socket, io);
     chat(socket, io);
   });
