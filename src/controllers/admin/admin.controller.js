@@ -1,5 +1,12 @@
 const { AdminService, ResponseService } = require('../../services');
 
+exports.getMe = async (req, res) => {
+  if (req.user) {
+    return res.status(200).json(ResponseService.response(200, null, req.user));
+  }
+  return res.status(403).json(ResponseService.error(403, null, null));
+};
+
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await AdminService.getAllUsers();
@@ -64,7 +71,7 @@ exports.updateUserById = async (req, res) => {
   try {
     const { userId } = req.params;
     const { status } = req.body;
-    const updated = AdminService.updateUserById(userId, status);
+    const updated = await AdminService.updateUserById(userId, status);
     return res.status(200).json(ResponseService.response(200, null, updated));
   } catch (error) {
     return res

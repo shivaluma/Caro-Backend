@@ -28,7 +28,7 @@ module.exports = {
   },
 
   updateUserById: async (id, status) => {
-    const updated = await getCollection.findOneAndUpdate(
+    const updated = await getCollection('users').findOneAndUpdate(
       { _id: ObjectId(id) },
       { $set: { status } },
       { returnNewDocument: true, returnOriginal: false },

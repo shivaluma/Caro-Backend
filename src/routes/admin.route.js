@@ -7,6 +7,7 @@ const AdminMiddleWare = require('../middleware/admin-auth.middleware');
 const authenticate = passport.authenticate('jwt', { session: false });
 
 router.post('/signin', AdminAuthController.postSignInAdmin);
+router.get('/me', authenticate, AdminMiddleWare, AdminController.getMe);
 router.get(
   '/matchs',
   authenticate,
@@ -15,12 +16,14 @@ router.get(
 );
 router.get(
   '/match/user/:userId',
+  authenticate,
   AdminMiddleWare,
   AdminController.getMatchByUserId,
 );
 
 router.get(
   '/match/:matchId',
+  authenticate,
   AdminMiddleWare,
   AdminController.getMatchByMatchId,
 );
