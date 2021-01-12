@@ -24,4 +24,10 @@ module.exports = {
     });
     return res;
   },
+  getMatchById: async (matchId) => {
+    const match = await getCollection('rooms').findOne({
+      _id: ObjectId(matchId),
+    });
+    return match;
+  },
 };

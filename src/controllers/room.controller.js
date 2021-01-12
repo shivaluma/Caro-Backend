@@ -31,3 +31,15 @@ exports.getRoomById = (req, res) => {
     .status(200)
     .json(ResponseService.response(200, 'Get room success', room));
 };
+
+exports.getMatchById = async (req, res) => {
+  const { matchId } = req.params;
+  try {
+    const match = await RoomService.getMatchById(matchId);
+    return res.status(200).json(ResponseService.response(200, null, match));
+  } catch (error) {
+    return res
+      .status(400)
+      .json(ResponseService.error(400, 'Can not get this match', error));
+  }
+};
