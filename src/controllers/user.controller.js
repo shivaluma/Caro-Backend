@@ -77,7 +77,6 @@ exports.putUpdateProfile = async (req, res) => {
 exports.getOnline = async (req, res) => {
   try {
     const userOnline = await OnlineService.getUsersOnline();
-    console.log(userOnline);
     return res.status(200).json(
       ResponseService.response(
         200,
@@ -100,10 +99,8 @@ exports.getOnline = async (req, res) => {
 
 exports.getProfile = async (req, res) => {
   const { id } = req.query;
-
   try {
     const user = await UserService.getUserInfo(id);
-
     return res.status(200).json(
       ResponseService.response(
         200,
@@ -126,7 +123,6 @@ exports.getProfile = async (req, res) => {
 
 exports.getGameProfile = async (req, res) => {
   const { id } = req.query;
-
   try {
     const games = await UserService.getUserGames(id);
 
