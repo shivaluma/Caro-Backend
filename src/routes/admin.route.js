@@ -11,18 +11,18 @@ router.get(
   '/matchs',
   authenticate,
   AdminMiddleWare,
-  AdminController.getAllHistory,
+  AdminController.getAllMatch,
 );
 router.get(
   '/match/user/:userId',
   AdminMiddleWare,
-  AdminController.getHistoryByUserId,
+  AdminController.getMatchByUserId,
 );
 
 router.get(
   '/match/:matchId',
   AdminMiddleWare,
-  AdminController.getHistoryByUserId,
+  AdminController.getMatchByMatchId,
 );
 
 router.get(

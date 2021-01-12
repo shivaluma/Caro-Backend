@@ -11,18 +11,18 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-exports.getAllHistory = async (req, res) => {
+exports.getAllMatch = async (req, res) => {
   try {
     const histories = await AdminService.getAllHistory();
     return res.status(200).json(ResponseService.response(200, null, histories));
   } catch (error) {
     return res
       .status(400)
-      .json(ResponseService.error(400, 'Can not get all histories', error));
+      .json(ResponseService.error(400, 'Can not get all matches', error));
   }
 };
 
-exports.getHistoryByUserId = async (req, res) => {
+exports.getMatchByUserId = async (req, res) => {
   const { userId } = req.params;
   try {
     const history = await AdminService.getHistoryByUserId(userId);
@@ -30,7 +30,7 @@ exports.getHistoryByUserId = async (req, res) => {
   } catch (error) {
     return res
       .status(400)
-      .json(ResponseService.error(400, 'Can not get this history', error));
+      .json(ResponseService.error(400, 'Can not get this match', error));
   }
 };
 
@@ -59,6 +59,7 @@ exports.getUserById = async (req, res) => {
       .json(ResponseService.error(400, 'Can not find this user', error));
   }
 };
+
 exports.updateUserById = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -72,7 +73,7 @@ exports.updateUserById = async (req, res) => {
   }
 };
 
-exports.getHistoryByMatchId = async (req, res) => {
+exports.getMatchByMatchId = async (req, res) => {
   const { matchId } = req.params;
   try {
     const match = await AdminService.getMatchById(matchId);
@@ -80,6 +81,6 @@ exports.getHistoryByMatchId = async (req, res) => {
   } catch (error) {
     return res
       .status(400)
-      .json(ResponseService.error(400, 'Can not get this history', error));
+      .json(ResponseService.error(400, 'Can not get this match', error));
   }
 };
