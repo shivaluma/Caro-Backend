@@ -37,8 +37,15 @@ module.exports = {
   },
 
   getHistoryByUserId: async (id) => {
-    const history = await getCollection('rooms').findOne({ _id: ObjectId(id) });
-    return history;
+    const gamesPromise = getCollection('rooms')
+      .find(
+        {
+          $or: [{ 'firstPlayer._id': id }, { 'secondPlayer._id': id }],
+        },
+        { projection: { chats: 0, board: 0 } },
+      )
+      .toArray();
+    return gamesPromise;
   },
 
   getChatByMatchId: async (matchId) => {
