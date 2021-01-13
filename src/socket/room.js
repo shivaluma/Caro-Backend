@@ -88,11 +88,13 @@ module.exports = (socket, io) => {
     socket.room.userTurn = user;
     socket.room.move.push(lastTick);
     socket.join(`room-${roomId}`);
+    socket.room.newTurnMilestone = new Date();
     io.to(`room-${roomId}`).emit('room-change-cli', {
       board,
       next,
       user,
       lastTick,
+      newTurnMilestone: new Date(),
       move: socket.room.move,
     });
   });
