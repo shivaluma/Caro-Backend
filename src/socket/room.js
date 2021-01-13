@@ -116,15 +116,20 @@ module.exports = (socket, io) => {
   socket.on('game-end', ({ board, roomId, next, lastTick, lose }) => {
     const room = roomService.rooms[roomId];
     if (!room || !room.firstPlayer || !room.secondPlayer) return;
-
-    let winner = next ? room.firstPlayer : room.secondPlayer;
-    let loser = next ? room.secondPlayer : room.firstPlayer;
+    let winner;
+    let loser;
     if (lose) {
       if (lose._id)
-        if (lose._id !== loser._id) {
-          loser = winner;
-          winner = lose;
+        if (lose._id === room.firstPlayer._id) {
+          loser = room.firstPlayer;
+          winner = room.secondPlayer;
+        } else {
+          winner = room.firstPlayer;
+          loser = room.secondPlayer;
         }
+    } else {
+      loser = next ? room.secondPlayer : room.firstPlayer;
+      winner = next ? room.firstPlayer : room.secondPlayer;
     }
     socket.room.move.push(lastTick);
     roomService.createRoom(room, winner, board, socket.room.move);
@@ -133,13 +138,13 @@ module.exports = (socket, io) => {
     room.ready.secondPlayer = false;
     room.started = false;
     if (lose === 'draw') {
-      userService.updateField(winner._id, {
-        point: winner.point - 10,
-        drawcount: winner.drawcount + 1,
+      userService.updateField(room.firstPlayer._id, {
+        point: room.firstPlayer.point - 10,
+        drawcount: room.firstPlayer.drawcount + 1,
       });
-      userService.updateField(loser._id, {
-        point: loser.point - 10,
-        drawcount: loser.drawcount + 1,
+      userService.updateField(room.secondPlayer._id, {
+        point: room.secondPlayer.point - 10,
+        drawcount: room.secondPlayer.drawcount + 1,
       });
     } else {
       userService.updateField(winner._id, {
