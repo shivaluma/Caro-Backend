@@ -1,6 +1,7 @@
 const argon = require('argon2');
 const roomService = require('../services/RoomService');
 const userService = require('../services/UserService');
+const compare = require('../utils/compare');
 
 module.exports = (socket, io) => {
   socket.on('create-room', async ({ user, option }) => {
@@ -241,48 +242,65 @@ module.exports = (socket, io) => {
     }
     if (io.quickMatch.findIndex((el) => el._id === user._id) === -1) {
       await io.quickMatch.push(user);
+      io.quickMatch.sort(compare);
+    }
+    const users = [];
+
+    if (io.quickMatch.length >= 2) {
+      // eslint-disable-next-line no-plusplus
+      for (let i = 0; i < io.quickMatch.length - 1; i++) {
+        if (io.quickMatch[i + 1].point - io.quickMatch[i].point <= 50) {
+          const user1 = io.quickMatch[i + 1];
+          const user2 = io.quickMatch[i];
+          users.push(user1);
+          users.push(user2);
+
+          roomId =
+            socket.roomId ||
+            roomService.rooms.findIndex(
+              (r) =>
+                r === null ||
+                ((!r.owner || r.owner._id === user._id) &&
+                  r.firstPlayer === null &&
+                  r.secondPlayer === null &&
+                  !r.password &&
+                  !option.password),
+            );
+          if (!roomService.rooms[roomId]) {
+            roomService.rooms[roomId] = {
+              firstPlayer: null,
+              secondPlayer: null,
+              roomId,
+              chats: [],
+              owner: user1,
+              people: [user1, user2],
+              board: null,
+              createdAt: new Date(),
+              userTurn: null,
+              next: null,
+              lastTick: null,
+              started: false,
+              rules: {
+                min: 5,
+              },
+              ready: {
+                firstPlayer: false,
+                secondPlayer: false,
+              },
+              move: [],
+              ...option,
+            };
+          }
+          io.quickMatch = io.quickMatch.filter(
+            (el) => el._id !== user1._id && el._id !== user2._id,
+          );
+
+          break;
+        }
+      }
     }
 
-    if (io.quickMatch.length === 2) {
-      roomId =
-        socket.roomId ||
-        roomService.rooms.findIndex(
-          (r) =>
-            r === null ||
-            ((!r.owner || r.owner._id === user._id) &&
-              r.firstPlayer === null &&
-              r.secondPlayer === null &&
-              !r.password &&
-              !option.password),
-        );
-      if (!roomService.rooms[roomId]) {
-        roomService.rooms[roomId] = {
-          firstPlayer: null,
-          secondPlayer: null,
-          roomId,
-          chats: [],
-          owner: io.quickMatch[0],
-          people: io.quickMatch,
-          board: null,
-          createdAt: new Date(),
-          userTurn: null,
-          next: null,
-          lastTick: null,
-          started: false,
-          rules: {
-            min: 5,
-          },
-          ready: {
-            firstPlayer: false,
-            secondPlayer: false,
-          },
-          move: [],
-          ...option,
-        };
-      }
-      io.quickMatch = null;
-    }
-    io.emit('quick-match-cli', { roomId });
+    io.emit('quick-match-cli', { roomId, users });
   });
 
   socket.on('cancel-quick-match', async ({ user }) => {
