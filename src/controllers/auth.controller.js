@@ -137,6 +137,20 @@ exports.postSignIn = async (req, res) => {
         .json(ResponseService.error(400, 'Wrong email or password.', null));
     }
 
+    if (!user.active) {
+      return res
+        .status(400)
+        .json(ResponseService.error(400, 'Please active your account.', null));
+    }
+
+    if (user.status === 'banned') {
+      return res
+        .status(400)
+        .json(
+          ResponseService.error(400, 'Your account has been banned.', null),
+        );
+    }
+
     const data = await redis.getAsync(`users:${user._id}`);
 
     if (data) {

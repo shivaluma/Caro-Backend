@@ -12,7 +12,7 @@ const http = require('http');
 const db = require('./config/db');
 
 const redisAdapter = adapter({
-  host: process.env.REDIS_HOST || 'localhost',
+  host: process.env.REDIS_HOST || '10.126.4.69',
   port: process.env.REDIS_PORT || 6379,
   password: 'pppp',
 });

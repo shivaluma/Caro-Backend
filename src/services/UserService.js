@@ -77,6 +77,7 @@ module.exports = {
         { projection: { chats: 0, board: 0 } },
       )
       .sort({ createAt: -1 })
+      .limit(10)
       .toArray();
     return games;
   },

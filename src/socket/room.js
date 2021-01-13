@@ -116,7 +116,7 @@ module.exports = (socket, io) => {
   socket.on('game-end', ({ board, roomId, next, lastTick, lose }) => {
     const room = roomService.rooms[roomId];
     if (!room || !room.firstPlayer || !room.secondPlayer) return;
-    socket.join(`room-${roomId}`);
+
     let winner = next ? room.firstPlayer : room.secondPlayer;
     let loser = next ? room.secondPlayer : room.firstPlayer;
     if (lose) {
@@ -159,7 +159,7 @@ module.exports = (socket, io) => {
     } else if (lose) {
       next = lose._id !== room.firstPlayer._id;
     }
-    io.to(`room-${roomId}`).emit('game-end-cli', {
+    io.in(`room-${roomId}`).emit('game-end-cli', {
       board,
       next,
       lastTick,
