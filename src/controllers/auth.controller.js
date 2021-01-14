@@ -228,7 +228,7 @@ exports.postGoogleSignIn = async (req, res) => {
       response.sub,
     );
 
-    const newUser = newUserResponse.ops[0];
+    const newUser = newUserResponse;
 
     const payload = { _id: newUser._id };
     const userData = { ...newUser };
@@ -310,7 +310,7 @@ exports.postFacebookSignin = async (req, res) => {
       response.id,
     );
 
-    const newUser = newUserResponse.ops[0];
+    const newUser = newUserResponse;
 
     const userData = { ...newUser };
     delete userData.password;
