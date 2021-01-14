@@ -209,8 +209,13 @@ module.exports = (socket, io) => {
       .emit('player-change-side', { user, roomId, side, leaveSide, userTurn });
   });
 
-  socket.on('claim-draw', ({ roomId }) => {
-    socket.to(`room-${roomId}`).emit('claim-draw-cli');
+  socket.on('claim-draw', ({ roomId, user }) => {
+    let userDraw;
+    const room = roomService.rooms[roomId];
+    if (!room || !room.firstPlayer || !room.secondPlayer) return;
+    if (user._id === room.firstPlayer) userDraw = room.secondPlayer;
+    else userDraw = room.firstPlayer;
+    socket.to(`room-${roomId}`).emit('claim-draw-cli', { userDraw });
   });
 
   socket.on('user-leave-room', ({ roomId, user }) => {
