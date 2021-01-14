@@ -8,7 +8,7 @@ module.exports = {
         email,
         password,
         role: 'user',
-        status: 'active',
+        status: 'normal',
         displayName,
         idGoogle,
         active: false,

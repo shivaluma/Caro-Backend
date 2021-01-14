@@ -177,7 +177,7 @@ exports.postSignIn = async (req, res) => {
   } catch (err) {
     return res
       .status(500)
-      .json(ResponseService.error(500, 'Server error.', err));
+      .json(ResponseService.error(500, 'Cannot login.', err));
   }
 };
 
