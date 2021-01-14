@@ -213,7 +213,7 @@ module.exports = (socket, io) => {
     let userDraw;
     const room = roomService.rooms[roomId];
     if (!room || !room.firstPlayer || !room.secondPlayer) return;
-    if (user._id === room.firstPlayer) userDraw = room.secondPlayer;
+    if (user?._id === room?.firstPlayer._id) userDraw = room.secondPlayer;
     else userDraw = room.firstPlayer;
     socket.to(`room-${roomId}`).emit('claim-draw-cli', { userDraw });
   });
