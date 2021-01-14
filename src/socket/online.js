@@ -36,9 +36,11 @@ module.exports = (socket, io) => {
     }
 
     if (
-      (socket?.room?.firstPlayer?._id !== user._id &&
-        socket?.room?.secondPlayer?._id !== user._id) ||
-      !socket.room.started
+      !(
+        (socket?.room?.firstPlayer?._id === user._id ||
+          socket?.room?.secondPlayer?._id === user._id) &&
+        socket.room.started
+      )
     ) {
       return;
     }
