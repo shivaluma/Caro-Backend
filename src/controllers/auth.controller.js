@@ -200,6 +200,12 @@ exports.postGoogleSignIn = async (req, res) => {
 
     if (user) {
       if (user.idGoogle === response.sub) {
+        if (user.status === 'banned') {
+          return res
+            .status(400)
+            .json(ResponseService.error(400, 'Your account has been banned.'));
+        }
+
         const payload = { ...user };
         delete payload.password;
         const accessToken = jwt.sign(payload, process.env.SECRET_KEY);
@@ -287,19 +293,36 @@ exports.postFacebookSignin = async (req, res) => {
     const response = await got(`${query}`).json();
 
     const user = await UserService.findOne({
-      $or: [{ 'socials.facebookId': response.id }, { email: response.email }],
+      $or: [{ idFacebook: response.id }, { email: response.email }],
     });
 
     if (user) {
-      const payload = { ...user };
-      delete payload.password;
-      const accessToken = jwt.sign(payload, process.env.SECRET_KEY);
-      return res.status(200).json(
-        ResponseService.response(200, 'Login Successfully.', {
-          accessToken,
-          user: payload,
-        }),
-      );
+      if (user.idFacebook === response.id) {
+        if (user.status === 'banned') {
+          return res
+            .status(400)
+            .json(ResponseService.error(400, 'Your account has been banned.'));
+        }
+
+        const payload = { ...user };
+        delete payload.password;
+        const accessToken = jwt.sign(payload, process.env.SECRET_KEY);
+        return res.status(200).json(
+          ResponseService.response(200, 'Login Successfully.', {
+            accessToken,
+            user: payload,
+          }),
+        );
+      }
+
+      return res
+        .status(400)
+        .json(
+          ResponseService.error(
+            400,
+            'There is an account with this email address, if you own the account, please login and then bind to this facebook account.',
+          ),
+        );
     }
 
     const newUserResponse = await UserService.createUser(

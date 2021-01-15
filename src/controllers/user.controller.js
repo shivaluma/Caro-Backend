@@ -11,6 +11,13 @@ const redis = require('../config/redis');
 
 exports.getMe = async (req, res) => {
   if (req.user) {
+    if (req.user.status === 'banned') {
+      return res
+        .status(403)
+        .json(
+          ResponseService.error(403, 'Your account has been banned.', null),
+        );
+    }
     const data = await redis.getAsync(`users:${req.user._id}`);
     if (data) {
       return res
